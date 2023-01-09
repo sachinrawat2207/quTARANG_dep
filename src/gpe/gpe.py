@@ -2,9 +2,7 @@ from gpe.set_device import xp
 from gpe.univ.my_fft import *
 from gpe.univ.grid import Grid
 from gpe.univ.params import Params
-from gpe.univ import my_fft
-
-
+from gpe.univ import my_fft, fns
 
 class Vector_field():
     Vx = []
@@ -31,7 +29,7 @@ class Vector_field():
             self.omegai_kz = xp.zeros((params.Nx, params.Ny), dtype = params.complex_dtype)
             self.temp = xp.zeros((params.Nx, params.Ny), dtype = params.complex_dtype)
             self.temp1 = xp.zeros((params.Nx, params.Ny), dtype = params.complex_dtype)
- 
+        
         if params.dimension == 3:
             self.Vx = xp.zeros((params.Nx, params.Ny, params.Nz), dtype = params.complex_dtype)
             self.Vy = xp.zeros((params.Nx, params.Ny, params.Nz), dtype = params.complex_dtype)
@@ -41,11 +39,11 @@ class Vector_field():
             self.omegai_kz = xp.zeros((params.Nx, params.Ny, params.Nz), dtype = params.complex_dtype)
             self.temp = xp.zeros((params.Nx, params.Ny, params.Nz), dtype = params.complex_dtype)
             self.temp1 = xp.zeros((params.Nx, params.Ny, params.Nz), dtype = params.complex_dtype)
-    
 
 
 class GPE():
-    def __init__(self, params: Params, grid: Grid):
+    def __init__(self, params: Params):
+        self.params = params
         self.grid = Grid(params)
         self.wfc = []
         self.pot = []
@@ -67,30 +65,31 @@ class GPE():
         self.yrms = []
         self.zrms = []
         self.t_rms = []
+        
+        self.U = Vector_field(params)
         self.set_arrays()
         
-    def set_arrays(self, params: Params):   
-        if params.dimension == 2:
-            self.wfc = xp.zeros((params.Nx, params.Ny), dtype = params.complex_dtype)
-            self.V = xp.zeros((params.Nx, params.Ny), dtype = params.real_dtype)
+    def set_arrays(self):   
+        if self.params.dimension == 2:
+            self.wfc = xp.zeros((self.params.Nx, self.params.Ny), dtype = self.params.complex_dtype)
+            self.V = xp.zeros((self.params.Nx, self.params.Ny), dtype = self.params.real_dtype)
             
-        elif params.dimension == 3:
-            self.wfc = xp.zeros((params.Nx, params.Ny, params.Nz), dtype = params.complex_dtype)
-            self.V = xp.zeros((params.Nx, params.Ny, params.Nz), dtype = params.real_dtype)
-    
-    
-    
+        elif self.params.dimension == 3:
+            self.wfc = xp.zeros((self.params.Nx, self.params.Ny, self.params.Nz), dtype = self.params.complex_dtype)
+            self.V = xp.zeros((self.params.Nx, self.params.Ny, self.params.Nz), dtype = self.params.real_dtype)
+
+'''
     def comp_energy(self, U = Vector_field()): #C
         U.temp[:] = my_fft.forward_transform(self.wfc) #for sstep_strang
-        deriv = para.volume * xp.sum(my_fft.ksqr * xp.abs(U.temp)**2)  
-        return fns.integral(((self.V + 0.5 * para.g * xp.abs(self.wfc)**2) * xp.abs(self.wfc)**2)) + deriv/2
+        deriv = self.params.volume * xp.sum(my_fft.ksqr * xp.abs(U.temp)**2)  
+        return fns.integral(((self.V + 0.5 * self.params.g * xp.abs(self.wfc)**2) * xp.abs(self.wfc)**2)) + deriv/2
     
     def comp_quantum_energy(self, U = Vector_field()): #C
         fns.gradient(xp.abs(self.wfc), U)
-        if para.dimension == 2:
+        if self.params.dimension == 2:
             U.temp[:] = 0.5 * (U.Vx**2 + U.Vy**2) 
 
-        elif para.dimension == 3:
+        elif self.params.dimension == 3:
             U.temp[:] = 0.5 * (U.Vx**2 + U.Vy**2 + U.Vz**2)
         return fns.integral(U.temp.real)
 
@@ -217,6 +216,5 @@ class GPE():
         U.temp[:] = my_fft.forward_transform(xp.abs(self.wfc)**2)
         U.temp[:] = 0.5 * para.g * xp.abs(U.temp)**2
         IE_spectrum = self.binning(U.temp)
-        return IE_spectrum    
-    
-    
+        return IE_spectrum   
+'''

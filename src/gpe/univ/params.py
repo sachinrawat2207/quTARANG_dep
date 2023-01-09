@@ -1,5 +1,3 @@
-from gpe.univ.grid import Grid
-
 class Params:
     """
     Class to store all necessary parameters of the simulation.
