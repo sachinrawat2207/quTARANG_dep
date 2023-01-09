@@ -1,5 +1,3 @@
-# Example Package
+# quTARANG
 
-This is a simple example package. You can use
-[Github-flavored Markdown](https://guides.github.com/features/mastering-markdown/)
-to write your content.
+A Gross-Piatevskii equation solver written in python with support for both CPUs as well as GPUs. 
