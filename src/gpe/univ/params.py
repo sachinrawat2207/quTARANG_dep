@@ -5,15 +5,26 @@ class Params:
     def __init__(self,
                 N: list = [128, 1, 1],
                 L: float = [32, 1, 1],
-                g : float = 0,
+                g: float = 0,
+                dt: float = 0.001,
+                tmax: float = 5,
+                scheme: str = 'TSSP',
+                itime: bool = True,
                 **kwargs) -> None:
-             
+        
         ## Store the parameters
         self.Nx, self.Ny, self.Nz = N
         self.Lx, self.Ly, self.Lz = L
         self.g  = g
-        self.real_dtype = kwargs.get('real_dtype','np.float64')
-        self.complex_dtype = kwargs.get('complex_dtype','np.complex64')
+        self.real_dtype = kwargs.get('real_dtype','float')
+        self.complex_dtype = kwargs.get('complex_dtype','complex')
+        self.dt = dt
+        self.volume = self.Lx * self.Ly * self.Lz
+        self.scheme = scheme
+        self.itime = itime
+        self.save_rms = True
+        self.save_rms_start_step = 0
+        self.save_rms_iter_step = 10
         
         ## Set the dimension
         if self.Nz == 1:
@@ -23,7 +34,9 @@ class Params:
                 self.dim = 2
         else:
             self.dim = 3
-            
+        
+        self.nstep = int(tmax/dt)    
+
 
     def __repr__(self) -> str:
         """
