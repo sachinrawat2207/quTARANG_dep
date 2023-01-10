@@ -8,7 +8,7 @@ def set_init(x, y=0):
     wfc = (1/xp.pi)**0.5 * xp.exp(-(x**2 +y**2)/2)
     pot = 0.5*(x**2 + y**2) 
     return wfc, pot
-    
+   
 
 # def set_init(x, y=0, z=0):
 #     wfc = (8**0.25)*(0.25*xp.pi)**(-3/8) * xp.exp(2*(-x**2 - 2*y**2 - 4*z**2))

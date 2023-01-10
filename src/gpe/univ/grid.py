@@ -40,8 +40,8 @@ class Grid:
         self.z = xp.arange(-params.Nz//2, params.Nz//2)
         self.kz = 2 * xp.pi * xp.roll(self.z, params.Nz//2)/params.Lz
         self.z = self.z * params.Lz/params.Nz
-        self.dkz = params.Lz/params.Nz
-        self.dz = 2 * xp.pi/params.Lz
+        self.dz  = params.Lz/params.Nz
+        self.dkz = 2 * xp.pi/params.Lz
     
     def setup_meshgrid(self, params):
         if params.dim == 1:
