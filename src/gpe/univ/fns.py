@@ -13,21 +13,21 @@ def integral_k(psik, params):
     return params.volume * xp.sum(psik)
 
 
-# Calculates the gradient of the wavefunction
-# def gradient(psi, params: Params, grid: Grid, U = Vector_field()):
-#     if params.dim == 1:
-#         U.temp[:] = my_fft.forward_transform(psi)
-#         U.Vx = my_fft.inverse_transform(1j * grid.kx * U.temp) 
+#Calculates the gradient of the wavefunction    
+def gradient(psi, G):
+    if G.params.dim == 1:
+        G.U.temp[:] = my_fft.forward_transform(psi)
+        G.U.Vx[:] = my_fft.inverse_transform(1j * G.grid.kx * G.U.temp) 
         
-#     elif params.dim == 2:
-#         U.temp[:, :] = my_fft.forward_transform(psi)
-#         U.Vx[:, :] = my_fft.inverse_transform(1j * grid.kx * U.temp)
-#         U.Vy[:, :] = my_fft.inverse_transform(1j * grid.ky * U.temp)
+    elif G.params.dim == 2:
+        G.U.temp[:, :] = my_fft.forward_transform(psi)
+        G.U.Vx[:, :] = my_fft.inverse_transform(1j * G.grid.kx * G.U.temp)
+        G.U.Vy[:, :] = my_fft.inverse_transform(1j * G.grid.ky * G.U.temp)
     
-#     elif params.dim == 3:
-#         U.temp[:, :, :] = my_fft.forward_transform(psi)
-#         U.Vx[:, :, :] = my_fft.inverse_transform(1j * grid.kx * U.temp)
-#         U.Vy[:, :, :] = my_fft.inverse_transform(1j * grid.ky * U.temp)
-#         U.Vz[:, :, :] = my_fft.inverse_transform(1j * grid.kz * U.temp)
+    elif G.params.dim == 3:
+        G.U.temp[:, :, :] = my_fft.forward_transform(psi)
+        G.U.Vx[:, :, :] = my_fft.inverse_transform(1j * G.grid.kx * G.U.temp)
+        G.U.Vy[:, :, :] = my_fft.inverse_transform(1j * G.grid.ky * G.U.temp)
+        G.U.Vz[:, :, :] = my_fft.inverse_transform(1j * G.grid.kz * G.U.temp)
     
-#     return
+    return

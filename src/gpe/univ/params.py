@@ -22,9 +22,21 @@ class Params:
         self.volume = self.Lx * self.Ly * self.Lz
         self.scheme = scheme
         self.itime = itime
+       
         self.save_rms = True
         self.save_rms_start_step = 0
-        self.save_rms_iter_step = 10
+        self.save_rms_iter_step = 100
+       
+        self.save_ektk = False
+        self.save_ektk_start_step = 0
+        self.save_ektk_iter_step = 100
+        
+        self.save_en_start_step = 0
+        self.save_en_iter_step = 100
+        
+        self.save_wfc == False
+        self.save_wfc_start_step = 0
+        self.save_wfc_iter_step = 100
         
         ## Set the dimension
         if self.Nz == 1:

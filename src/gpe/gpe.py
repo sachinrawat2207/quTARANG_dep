@@ -71,6 +71,7 @@ class GPE():
         self.U = Vector_field(params)
         self.set_arrays()
         self.set_init(set_init)
+        evolution.set_scheme(self)
         
     def set_arrays(self):
         if self.params.dim == 1:
@@ -107,7 +108,10 @@ class GPE():
     def evolve(self):
         evolution.time_advance(self)
     
-    def compute_chempot(self):   #C
+    def evolve_ms(self):
+        evolution.time_advance_ms(self)    
+    
+    def compute_chempot(self):   
         self.U.temp[:] = my_fft.forward_transform(self.wfc) #for sstep_strang
         deriv = self.params.volume * xp.sum(self.grid.ksqr * xp.abs(self.U.temp)**2)  
         return fns.integral(((self.pot + self.params.g * xp.abs(self.wfc)**2) * xp.abs(self.wfc)**2), self.grid) + deriv/2
@@ -128,124 +132,113 @@ class GPE():
     
     # def compute_rrms(self):   
     #     return (fns.integral(xp.abs(self.wfc)**2 * (self.grid.xx**2 + self.grid.yy**2 + self.grid.zz**2), self.grid) - (fns.integral(xp.abs(self.wfc)**2 * self.grid.zz, self.grid))**2)**.5
+
+    def compute_energy(self):     #C
+        self.self.U.temp[:] = my_fft.forward_transform(self.wfc) #for sstep_strang
+        deriv = self.params.volume * xp.sum(self.grid.ksqr * xp.abs(self.U.temp)**2)  
+        return fns.integral(((self.pot + 0.5 * self.params.g * xp.abs(self.wfc)**2) * xp.abs(self.wfc)**2), self.grid) + deriv/2
     
-'''
-    def comp_energy(self, U = Vector_field()): #C
-        U.temp[:] = my_fft.forward_transform(self.wfc) #for sstep_strang
-        deriv = self.params.volume * xp.sum(my_fft.ksqr * xp.abs(U.temp)**2)  
-        return fns.integral(((self.pot + 0.5 * self.params.g * xp.abs(self.wfc)**2) * xp.abs(self.wfc)**2)) + deriv/2
-    
-    def comp_quantum_energy(self, U = Vector_field()): #C
-        fns.gradient(xp.abs(self.wfc), U)
+    def compute_quantum_energy(self):  #C 
+        fns.gradient(xp.abs(self.wfc), self)
         if self.params.dim == 2:
-            U.temp[:] = 0.5 * (U.Vx**2 + U.Vy**2) 
+            self.U.temp[:] = 0.5 * (self.U.Vx**2 + self.U.Vy**2) 
 
         elif self.params.dim == 3:
-            U.temp[:] = 0.5 * (U.Vx**2 + U.Vy**2 + U.Vz**2)
-        return fns.integral(U.temp.real)
+            self.U.temp[:] = 0.5 * (self.U.Vx**2 + self.U.Vy**2 + self.U.Vz**2)
+        return fns.integral(self.U.temp.real, self.grid)
 
 
-    def comp_internal_energy(self, U = Vector_field()): #C
-        return 0.5 * para.g * fns.integral(xp.abs(self.wfc)**4)
+    def comp_internal_energy(self):  #C 
+        return 0.5 * para.g * fns.integral(xp.abs(self.wfc)**4, self.grid)
         
 
-    def comp_potential_energy(self, U = Vector_field()):   #C
-        return fns.integral(self.pot * xp.abs(self.wfc)**2) 
+    def comp_potential_energy(self): #C   
+        return fns.integral(self.pot * xp.abs(self.wfc)**2, self.grid) 
         
-    def comp_velocity(self, U = Vector_field()): #C
-        fns.gradient(self.wfc.conj(), U)
-        if para.dim == 2:
-            U.Vx[:] = -(self.wfc * U.Vx).imag/xp.abs(self.wfc)**2 
-            U.Vy[:] = -(self.wfc * U.Vy).imag/xp.abs(self.wfc)**2 
+    def comp_velocity(self):   #C
+        fns.gradient(self.wfc.conj(), self)
+        if self.params.dim == 2:
+            self.U.Vx[:] = -(self.wfc * self.U.Vx).imag/xp.abs(self.wfc)**2 
+            self.U.Vy[:] = -(self.wfc * self.U.Vy).imag/xp.abs(self.wfc)**2 
     
-        elif para.dim == 3:
-            U.Vx[:] = -(self.wfc * U.Vx).imag/xp.abs(self.wfc)**2 
-            U.Vy[:] = -(self.wfc * U.Vy).imag/xp.abs(self.wfc)**2 
-            U.Vz[:] = -(self.wfc * U.Vz).imag/xp.abs(self.wfc)**2 
+        elif self.params.dim == 3:
+            self.U.Vx[:] = -(self.wfc * self.U.Vx).imag/xp.abs(self.wfc)**2 
+            self.U.Vy[:] = -(self.wfc * self.U.Vy).imag/xp.abs(self.wfc)**2 
+            self.U.Vz[:] = -(self.wfc * self.U.Vz).imag/xp.abs(self.wfc)**2 
         return 
     
 
-    def comp_kinetic_energy(self, U = Vector_field): #C doubt while integrating in fourier space
-        self.comp_velocity(U)
-        U.temp[:] = 0.5 * xp.abs(self.wfc)**2 * (U.Vx**2 + U.Vy**2 + U.Vz**2)
-        return fns.integral(U.temp.real)
+    def comp_kinetic_energy(self):  # doubt while integrating in fourier space
+        self.comp_velocity()
+        self.U.temp[:] = 0.5 * xp.abs(self.wfc)**2 * (self.U.Vx**2 + self.U.Vy**2 + self.U.Vz**2)
+        return fns.integral(self.U.temp.real, self.grid)
 
      
-    def omegak(self, U = Vector_field()):  #C
-        self.comp_velocity(U) 
-        U.temp[:] = xp.abs(self.wfc)
-        U.omegai_kx[:] = my_fft.forward_transform(U.temp * U.Vx)
-        U.omegai_ky[:] = my_fft.forward_transform(U.temp * U.Vy)
-        U.omegai_kz[:] = my_fft.forward_transform(U.temp * U.Vz)
-        if para.dim == 2:
-            my_fft.ksqr[0, 0] = 1
-            U.temp[:] = (my_fft.kx * U.omegai_kx + my_fft.ky * U.omegai_ky)/my_fft.ksqr
+    def omegak(self):   #C
+        self.comp_velocity() 
+        self.U.temp[:] = xp.abs(self.wfc)
+        U.omegai_kx[:] = my_fft.forward_transform(self.U.temp * self.U.Vx)
+        U.omegai_ky[:] = my_fft.forward_transform(self.U.temp * self.U.Vy)
+        U.omegai_kz[:] = my_fft.forward_transform(self.U.temp * self.U.Vz)
+        if self.params.dim == 2:
+            self.grid.ksqr[0, 0] = 1
+            self.U.temp[:] = (self.grid.kxx * U.omegai_kx + self.grid.kyy * U.omegai_ky)/self.grid.ksqr
             # Compressible part calculation
-            U.Vx[:] = my_fft.kx * U.temp
-            U.Vy[:] = my_fft.ky * U.temp       
-            my_fft.ksqr[0, 0] = 0   
-            U.omegai_kx[:] = U.omegai_kx - U.Vx
-            U.omegai_ky[:] = U.omegai_ky - U.Vy
+            self.U.Vx[:] = self.grid.kxx * self.U.temp
+            self.U.Vy[:] = self.grid.kyy * self.U.temp       
+            self.grid.ksqr[0, 0] = 0   
+            U.omegai_kx[:] = U.omegai_kx - self.U.Vx
+            U.omegai_ky[:] = U.omegai_ky - self.U.Vy
         else:
-            my_fft.ksqr[0, 0, 0] = 1 
-            U.temp[:] = (my_fft.kx * U.omegai_kx + my_fft.ky * U.omegai_ky + my_fft.kz * U.omegai_kz)/my_fft.ksqr
+            self.grid.ksqr[0, 0, 0] = 1 
+            self.U.temp[:] = (self.grid.kxx * U.omegai_kx + self.grid.kyy * U.omegai_ky + self.grid.kzz * U.omegai_kz)/self.grid.ksqr
             # Compressible part calculation
-            U.Vx[:] = my_fft.kx * U.temp
-            U.Vy[:] = my_fft.ky * U.temp
-            U.Vz[:] = my_fft.kz * U.temp
-            my_fft.ksqr[0, 0, 0] = 0 
-            U.omegai_kx[:] = U.omegai_kx - U.Vx
-            U.omegai_ky[:] = U.omegai_ky - U.Vy
-            U.omegai_kz[:] = U.omegai_kz - U.Vz
+            self.U.Vx[:] = self.grid.kxx * self.U.temp
+            self.U.Vy[:] = self.grid.kyy * self.U.temp
+            self.U.Vz[:] = self.grid.kzz * self.U.temp
+            self.grid.ksqr[0, 0, 0] = 0 
+            U.omegai_kx[:] = U.omegai_kx - self.U.Vx
+            U.omegai_ky[:] = U.omegai_ky - self.U.Vy
+            U.omegai_kz[:] = U.omegai_kz - self.U.Vz
         return 
 
 
-    def KE_decomp(self, U = Vector_field()): #C
-        self.omegak(U)
-        if para.dim == 2:
-            KE_comp = 0.5 * fns.integral_k(xp.abs(U.Vx)**2 + xp.abs(U.Vy)**2)
-            KE_incomp = 0.5 * fns.integral_k(xp.abs(U.omegai_kx)**2 + xp.abs(U.omegai_ky)**2)
+    def KE_decomp(self):   #C
+        self.omegak()
+        if self.params.dim == 2:
+            KE_comp = 0.5 * fns.integral_k(xp.abs(self.U.Vx)**2 + xp.abs(self.U.Vy)**2, self.params)
+            KE_incomp = 0.5 * fns.integral_k(xp.abs(U.omegai_kx)**2 + xp.abs(U.omegai_ky)**2, self.params)
         else:
-            KE_comp = 0.5 * fns.integral_k(xp.abs(U.Vx)**2 + xp.abs(U.Vy)**2 + xp.abs(U.Vz)**2)
-            KE_incomp = 0.5 * fns.integral_k(xp.abs(U.omegai_kx)**2 + xp.abs(U.omegai_ky)**2 + xp.abs(U.omegai_kz)**2)
+            KE_comp = 0.5 * fns.integral_k(xp.abs(self.U.Vx)**2 + xp.abs(self.U.Vy)**2 + xp.abs(self.U.Vz)**2, self.params)
+            KE_incomp = 0.5 * fns.integral_k(xp.abs(U.omegai_kx)**2 + xp.abs(U.omegai_ky)**2 + xp.abs(U.omegai_kz)**2, self.params)
         return KE_comp, KE_incomp 
         
     
-        # For calculation of particle number flux
-    def comp_tk_particle_no(self, U = Vector_field()):    
-        U.temp[:] = my_fft.forward_transform(self.wfc)
-        U.temp1[:] = my_fft.forward_transform(para.g * self.wfc * xp.abs(self.wfc)**2 + self.wfc * self.pot)
-        temp = (U.temp1[:] * xp.conjugate(U.temp)).imag
+    # For calculation of particle number flux
+    def comp_tk_particle_no(self):    
+        self.U.temp[:] = my_fft.forward_transform(self.wfc)
+        self.U.temp1[:] = my_fft.forward_transform(para.g * self.wfc * xp.abs(self.wfc)**2 + self.wfc * self.pot)
+        temp = (self.U.temp1[:] * xp.conjugate(self.U.temp)).imag
         return self.binning(temp)
     
-    def comp_par_no_spectrum(self, U = Vector_field()):
-        U.temp[:] = xp.abs(my_fft.forward_transform(self.wfc))**2
-        return self.bining(U.temp)
+    def comp_par_no_spectrum(self):
+        self.U.temp[:] = xp.abs(my_fft.forward_transform(self.wfc))**2
+        return self.bining(self.U.temp)
         
-    def comp_KEcomp_spectrum(self, U = Vector_field()):
-        self.omegak(U)
-        if para.dim == 2:
+    def comp_KEcomp_spectrum(self):
+        self.omegak()
+        if self.params.dim == 2:
             KE_incompk = 0.5 * (xp.abs(U.omegai_kx)**2 + xp.abs(U.omegai_ky)**2) 
-            KE_compk = 0.5 * (xp.abs(U.Vx)**2 + xp.abs(U.Vy)**2)
-        elif para.dim == 3:
+            KE_compk = 0.5 * (xp.abs(self.U.Vx)**2 + xp.abs(self.U.Vy)**2)
+        elif self.params.dim == 3:
             KE_incompk = 0.5 * (xp.abs(U.omegai_kx)**2 + xp.abs(U.omegai_ky)**2 + xp.abs(U.omegai_kz)**2) 
-            KE_compk = 0.5 * (xp.abs(U.Vx)**2 + xp.abs(U.Vy)**2 + xp.abs(U.Vz)**2)
+            KE_compk = 0.5 * (xp.abs(self.U.Vx)**2 + xp.abs(self.U.Vy)**2 + xp.abs(self.U.Vz)**2)
         KEcomp_spectrum = self.binning(KE_compk)
         KEincomp_spectrum = self.binning(KE_incompk)
         return KEcomp_spectrum, KEincomp_spectrum
     
-    
-    def comp_QE_spectrum(self, U = Vector_field()):
-        U.temp[:] = fns.gradient(xp.abs(self.wfc), U)
-        U.temp[:] = my_fft.forward_transform(U.temp, axes = U.temp.shape[1:])
-        U.temp[:] = xp.sum(xp.abs(U.temp)**2, axis = 0)
-        QE_spectrum = self.binning(U.temp)
-        return QE_spectrum
-    
-    
-    def comp_IE_spectrum(self, U = Vector_field()):
-        U.temp[:] = my_fft.forward_transform(xp.abs(self.wfc)**2)
-        U.temp[:] = 0.5 * para.g * xp.abs(U.temp)**2
-        IE_spectrum = self.binning(U.temp)
+    def comp_IE_spectrum(self):
+        self.U.temp[:] = my_fft.forward_transform(xp.abs(self.wfc)**2)
+        self.U.temp[:] = 0.5 * para.g * xp.abs(self.U.temp)**2
+        IE_spectrum = self.binning(self.U.temp)
         return IE_spectrum   
-'''
