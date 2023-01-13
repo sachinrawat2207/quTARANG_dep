@@ -76,6 +76,7 @@ class GPE():
         self.set_init(set_init)
         evolution.set_scheme(self)
         
+        
     def set_arrays(self):
         if self.params.dim == 1:
             self.wfc = xp.zeros((self.params.Nx), dtype = self.params.complex_dtype)
