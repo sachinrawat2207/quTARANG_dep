@@ -42,8 +42,8 @@ class Params:
         self.Nx, self.Ny, self.Nz = N
         self.Lx, self.Ly, self.Lz = L
         self.g  = g
-        self.real_dtype = kwargs.get('real_dtype','float')
-        self.complex_dtype = kwargs.get('complex_dtype','complex')
+        self.real_dtype = kwargs.get('real_dtype','float64')
+        self.complex_dtype = kwargs.get('complex_dtype','complex128')
         self.dt = dt
         self.tmax = tmax
         self.volume = self.Lx * self.Ly * self.Lz

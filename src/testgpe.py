@@ -4,12 +4,12 @@ from gpe.set_device import xp
 from gpe.univ import my_fft
 from gpe import gpe
 
-N = [128, 128, 1]
-L = [29, 29, 1]
+N = [256, 256, 1]
+L = [29.84, 29.84, 1]
 ektk = [True, 0, 10000000]
-wfc = [True, 0, 100]
+wfc = [True, 0, 100000]
 
-par = Params(N, L, g = 0.1, dt=0.001, tmax = 2, energy = [True, 0, 100], ektk = ektk, wfc = wfc, path = '/home/Desktop/test')
+par = Params(N, L, g = 2, dt=0.0001, tmax = 1, energy = [True, 0, 100], ektk = ektk, wfc = wfc, path = '/home/Desktop/test')
 G = gpe.GPE(par)
 
 def set_init(x, y=0):
@@ -53,13 +53,15 @@ def set_init2D(x, y=0, z=0):
     return wfc, V
 
 print(par)
-
+xp.random.seed(0)
 G.set_init(set_init_tsubota)
 
-for i in range(10):
-    G.evolve_ms()
-    comp, incomp = G.KE_decomp()
-    print(G.compute_energy()/G.compute_norm()**2, G.compute_kinetic_energy()/G.compute_norm()**2 + G.compute_quantum_energy()/G.compute_norm()**2 + G.compute_internal_energy()/G.compute_norm()**2)
-    print(G.compute_kinetic_energy()/G.compute_norm()**2, comp/G.compute_norm()**2 + incomp/G.compute_norm()**2 )
+for i in range(1):
     
+    comp, incomp = G.KE_decomp()
+    print(G.compute_energy())
+    print(G.compute_kinetic_energy(), G.compute_quantum_energy(), G.compute_internal_energy())
+    print(comp, incomp)    
+    print('\n\n\n')
+    G.evolve_ms()
 print(type(G.wfc), G.wfc.shape)

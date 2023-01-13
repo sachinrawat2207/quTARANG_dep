@@ -47,17 +47,17 @@ def gradient(arr, G):
     """
     if G.params.dim == 1:
         G.U.temp[:] = my_fft.forward_transform(arr)
-        G.U.Vx[:] = my_fft.inverse_transform(1j * G.grid.kx * G.U.temp) 
+        G.U.Vx[:] = my_fft.inverse_transform(1j * G.grid.kxx * G.U.temp) 
         
     elif G.params.dim == 2:
         G.U.temp[:, :] = my_fft.forward_transform(arr)
-        G.U.Vx[:, :] = my_fft.inverse_transform(1j * G.grid.kx * G.U.temp)
-        G.U.Vy[:, :] = my_fft.inverse_transform(1j * G.grid.ky * G.U.temp)
+        G.U.Vx[:, :] = my_fft.inverse_transform(1j * G.grid.kxx * G.U.temp)
+        G.U.Vy[:, :] = my_fft.inverse_transform(1j * G.grid.kyy * G.U.temp)
     
     elif G.params.dim == 3:
         G.U.temp[:, :, :] = my_fft.forward_transform(arr)
-        G.U.Vx[:, :, :] = my_fft.inverse_transform(1j * G.grid.kx * G.U.temp)
-        G.U.Vy[:, :, :] = my_fft.inverse_transform(1j * G.grid.ky * G.U.temp)
-        G.U.Vz[:, :, :] = my_fft.inverse_transform(1j * G.grid.kz * G.U.temp)
+        G.U.Vx[:, :, :] = my_fft.inverse_transform(1j * G.grid.kxx * G.U.temp)
+        G.U.Vy[:, :, :] = my_fft.inverse_transform(1j * G.grid.kyy * G.U.temp)
+        G.U.Vz[:, :, :] = my_fft.inverse_transform(1j * G.grid.kzz * G.U.temp)
     
     return True
