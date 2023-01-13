@@ -7,7 +7,7 @@
 
 # C extensions
 *.so
-/output/
+output/
 testgpe.py
 # Distribution / packaging
 .Python
