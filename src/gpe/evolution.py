@@ -1,7 +1,7 @@
 from gpe.univ import my_fft
 from gpe.set_device import xp
 import gpe.in_op as in_op
-from pathlib import Path
+
 #-----------------------------------------TSSP scheme-----------------------------------------
 def tssp_stepr(G, dt: float):
     return G.wfc * xp.exp(-1j * (G.pot + G.params.g  * (G.wfc * G.wfc.conj())) * dt)
@@ -53,7 +53,9 @@ def time_advance_ms(G):
     
 def time_advance(G):
     t = 0 
-    in_op.gen_path(Path.cwd()) 
+    
+    if (G.params.save_wfc or G.params.save_energy or G.params.save_ektk or G.params.save_rms):
+        in_op.gen_path(G.params.output_path) 
     
     for i in range(G.params.nstep):
 

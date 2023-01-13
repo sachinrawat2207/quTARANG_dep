@@ -1,4 +1,4 @@
-from gpe.set_device import *
+from gpe.set_device import set_gpu
 from pathlib import Path
 class Params:
     """ Class to store all necessary parameters of the simulation.
@@ -8,7 +8,7 @@ class Params:
                 L: float = [32, 1, 1],
                 g: float = 0,
                 dt: float = 0.001,
-                tmax: float = 5,
+                tmax: float = 1,
                 scheme: str = 'TSSP',
                 imgtime: bool = False,
                 rms: list = [False, 0, 100],
@@ -17,8 +17,27 @@ class Params:
                 wfc: list = [False, 0, 100],
                 gpu: bool = False,
                 gpu_rank: int = 0,
+                output_path: str = Path.cwd(),
                 **kwargs) -> None:
-        
+        """
+        Parameters
+        ----------
+        N : list, optional
+            Grid points along x, y, z, by default [128, 1, 1]
+        L : float, optional
+            Length along x, y, z, by default [32, 1, 1]
+        g : float, optional
+            Nonlinearity constant, by default 0
+        dt : float, optional
+            time step, by default 0.001
+        tmax : float, optional
+            Maximum time , by default 1
+        scheme : str, optional
+            scheme, by default 'TSSP'
+        imgtime : bool, optional
+            set true for imaginary time, by default False
+
+        """
         ## Store the parameters
         self.Nx, self.Ny, self.Nz = N
         self.Lx, self.Ly, self.Lz = L
@@ -33,6 +52,7 @@ class Params:
         self.gpu = gpu
         self.gpu_rank = gpu_rank
         
+        self.output_path = Path(output_path)
         self.save_energy, self.save_en_start_step, self.save_en_iter_step = energy
         self.save_rms, self.save_rms_start_step, self.save_rms_iter_step = rms
         self.save_ektk, self.save_ektk_start_step, self.save_ektk_iter_step  =  ektk
@@ -69,7 +89,4 @@ class Params:
             f"  Imaginary Time: {self.imgtime}"
             ])
         )
-
-
-
 

@@ -1,31 +1,27 @@
 from gpe.set_device import xp, fft
 
 def forward_transform(arr):
-    """_summary_
-
+    """Forward Fourier Transform
+    
     Parameters
     ----------
-    arr : _type_
-        _description_
-
+    arr : Array
+    
     Returns
     -------
-    _type_
-        _description_
+    Forward Fourier transform of the input array
     """
     return fft.fftn(arr)/xp.product(arr.shape)
 
 def inverse_transform(arr):
-    """_summary_
-
+    """Inverse Fourier Transform
+    
     Parameters
     ----------
-    arr : _type_
-        _description_
-
+    arr : Array
+    
     Returns
     -------
-    _type_
-        _description_
+    Inverse Fourier tranform of the input array
     """
     return fft.ifftn(arr) * xp.product(arr.shape)

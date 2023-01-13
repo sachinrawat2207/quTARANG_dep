@@ -3,7 +3,6 @@ from gpe.univ.params import Params
 from gpe.univ.grid import Grid
 from gpe.set_device import xp
 
-
 # Integral in real space
 def integralr(arr, grid: Grid):
     """Integrates an array in real space (Trapezoid method).
@@ -33,7 +32,6 @@ def integralk(arrk, grid: Grid):
     complex
     """
     return grid.volume * xp.sum(arrk)
-
 
 #Calculates the gradient of the wavefunction    
 def gradient(arr, G):
