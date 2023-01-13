@@ -1,9 +1,6 @@
 import h5py as hp
-from pathlib import Path
 import os
-
 from gpe.set_device import xp
-from gpe.univ import fns
 
 # directory generation
 def gen_path(file_loc):
@@ -42,7 +39,7 @@ def save_wfc(G, t):
 
 
 def compute_energy(G, t):
-    norm = G.compute_norm()
+    norm = G.compute_norm()**2
     # comp_KE, incomp_KE = G.KE_decomp()
     if G.params.gpu == True:
         # G.comp_KE.append(xp.asnumpy(comp_KE/norm))
@@ -70,12 +67,12 @@ def compute_ektk(G, t):
     if G.params.gpu == True:
         G.KEcomp_spec.append(xp.asnumpy(KEcomp_spec))
         G.KEincomp_spec.append(xp.asnumpy(KEincomp_spec))
-        G.tk_par_no.append(xp.asnumpy(G.comp_tk_particle_no()))
+        # G.tk_par_no.append(xp.asnumpy(G.comp_tk_particle_no()))
         G.t_ektk.append(xp.asnumpy(t))
     else:
         G.KEcomp_spec.append(KEcomp_spec)
         G.KEincomp_spec.append(KEincomp_spec)
-        G.tk_par_no.append(G.comp_tk_particle_no())
+        # G.tk_par_no.append(G.comp_tk_particle_no())
         G.t_ektk.append(t)
 
 def compute_rms(G, t):
@@ -98,8 +95,8 @@ def save_ektk(G):
     f = hp.f = hp.File(filename, 'w')
     f.create_dataset('KEcomp_spec', data = G.KEcomp_spec)
     f.create_dataset('KEincomp_spec', data = G.KEincomp_spec)
-    f.create_dataset('tk_par_no', data = G.tk_par_no)
-    f.create_dataset('t_ektk', data = G.t_ektk)
+    # f.create_dataset('tk_par_no', data = G.tk_par_no)
+    # f.create_dataset('t_ektk', data = G.t_ektk)
         
 def save_rms(G):
     filename = path/'rms.hdf5'

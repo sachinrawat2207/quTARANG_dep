@@ -4,7 +4,6 @@ from gpe.set_device import xp
 class Grid:
     def __init__(self, params: Params) -> None:
         """Stores the grid for the simulation.
-
         Parameters
         ----------
         params : Params object
@@ -28,7 +27,7 @@ class Grid:
             self.setupZ(params)
             self.dV *= self.dz
             self.dkV *= self.dkz
-        
+            
     def setupX(self, params: Params):
         """Setup grid along x.
         """

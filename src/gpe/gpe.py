@@ -5,18 +5,19 @@ from gpe.univ.params import Params
 from gpe.univ import my_fft, fns
 from gpe import evolution
 
-
 class Vector_field():
-    """_summary_
+    """It contains the variables which helps to calculate the different physical quantities of gpe class 
     """
     Vx = []
     Vx = []  
     Vy = []
     Vz = []
-    # Used to take omegai
+    
+    # Used to calculate omegai
     omegai_kx = [] 
     omegai_ky = []
     omegai_kz = []
+    
     # Temporary variable
     temp = []
     
@@ -45,7 +46,9 @@ class Vector_field():
             self.temp1 = xp.zeros((params.Nx, params.Ny, params.Nz), dtype = params.complex_dtype)
 
 class GPE():
-    def __init__(self, params: Params, set_init):
+    """It contains the functions which calculates the quantities
+    """
+    def __init__(self, params: Params):
         self.params = params
         self.grid = Grid(params)
         self.wfc = []
@@ -73,9 +76,8 @@ class GPE():
         
         self.U = Vector_field(params)
         self.set_arrays()
-        self.set_init(set_init)
-        evolution.set_scheme(self)
-        
+        # self.set_init(set_init)
+        evolution.set_scheme(self)  
         
     def set_arrays(self):
         if self.params.dim == 1:
@@ -103,115 +105,44 @@ class GPE():
             self.wfc[:], self.pot[:] = fun(self.grid.xx, self.grid.yy, self.grid.zz)
         self.Npar = self.compute_norm()
     
+    
     def compute_norm(self):
-        """_summary_
-
-        Returns
-        -------
-        _type_
-            _description_
-        """
         return fns.integralr(xp.abs(self.wfc)**2, self.grid)**0.5
     
     def renormalize(self, normFact: float = 1.0):
-        """_summary_
-
-        Parameters
-        ----------
-        normFact : float, optional
-            _description_, by default 1.0
-        """
         self.wfc = normFact * self.wfc/self.compute_norm()
     
     def evolve(self):
-        """_summary_
-        """
         evolution.time_advance(self)
     
     def evolve_ms(self):
-        """_summary_
-        """
         evolution.time_advance_ms(self)    
     
     def compute_chempot(self):   
-        """_summary_
-
-        Returns
-        -------
-        _type_
-            _description_
-        """
         self.U.temp[:] = my_fft.forward_transform(self.wfc) #for sstep_strang
         deriv = self.params.volume * xp.sum(self.grid.ksqr * xp.abs(self.U.temp)**2)  
         return fns.integralr(((self.pot + self.params.g * xp.abs(self.wfc)**2) * xp.abs(self.wfc)**2), self.grid) + deriv/2
     
     def compute_xrms(self):
-        """_summary_
-
-        Returns
-        -------
-        _type_
-            _description_
-        """
         return (fns.integralr(xp.abs(self.wfc)**2 * self.grid.xx**2, self.grid) - (fns.integralr(xp.abs(self.wfc)**2 * self.grid.xx, self.grid))**2)**.5
         
     def compute_yrms(self):
-        """_summary_
-
-        Returns
-        -------
-        _type_
-            _description_
-        """
         return (fns.integralr(xp.abs(self.wfc)**2 * self.grid.yy**2, self.grid) - (fns.integralr(xp.abs(self.wfc)**2 * self.grid.yy, self.grid))**2)**.5   
 
     def compute_zrms(self):  
-        """_summary_
-
-        Returns
-        -------
-        _type_
-            _description_
-        """
         return (fns.integralr(xp.abs(self.wfc)**2 * self.grid.zz**2, self.grid) - (fns.integralr(xp.abs(self.wfc)**2 * self.grid.zz, self.grid))**2)**.5
     
     def compute_rrms(self):
-        """_summary_
-
-        Returns
-        -------
-        _type_
-            _description_
-        """
         if self.params.dim == 2:
             return (fns.integralr(xp.abs(self.wfc) ** 2 * (self.grid.xx**2 + self.grid.yy**2), self.grid))**.5
         return (fns.integralr(xp.abs(self.wfc) ** 2 * (self.grid.xx**2 + self.grid.yy**2 + self.grid.zz**2), self.grid))**.5
     
-    # def compute_rrms(self):   
-    #     return (fns.integralr(xp.abs(self.wfc)**2 * (self.grid.xx**2 + self.grid.yy**2 + self.grid.zz**2), self.grid) - (fns.integralr(xp.abs(self.wfc)**2 * self.grid.zz, self.grid))**2)**.5
-
     def compute_energy(self):     
-
-        """_summary_
-
-        Returns
-        -------
-        _type_
-            _description_
-        """
         self.U.temp[:] = my_fft.forward_transform(self.wfc) #for sstep_strang
         deriv = self.params.volume * xp.sum(self.grid.ksqr * xp.abs(self.U.temp)**2)  
         return fns.integralr(((self.pot + 0.5 * self.params.g * xp.abs(self.wfc)**2) * xp.abs(self.wfc)**2), self.grid) + deriv/2
     
     def compute_quantum_energy(self):  
- 
-        """_summary_
-
-        Returns
-        -------
-        _type_
-            _description_
-        """
         fns.gradient(xp.abs(self.wfc), self)
         if self.params.dim == 2:
             self.U.temp[:] = 0.5 * (self.U.Vx**2 + self.U.Vy**2) 
@@ -222,32 +153,13 @@ class GPE():
 
 
     def compute_internal_energy(self):  
- 
-        """_summary_
-
-        Returns
-        -------
-        _type_
-            _description_
-        """
         return 0.5 * self.params.g * fns.integralr(xp.abs(self.wfc)**4, self.grid)
         
 
     def compute_potential_energy(self): 
- 
-        """_summary_
-
-        Returns
-        -------
-        _type_
-            _description_
-        """  
         return fns.integralr(self.pot * xp.abs(self.wfc)**2, self.grid) 
         
     def compute_velocity(self):   
-
-        """_summary_
-        """
         fns.gradient(self.wfc.conj(), self)
         if self.params.dim == 2:
             self.U.Vx[:] = -(self.wfc * self.U.Vx).imag/xp.abs(self.wfc)**2 
@@ -261,21 +173,11 @@ class GPE():
     
 
     def compute_kinetic_energy(self):  # doubt while integrating in fourier space
-        """_summary_
-
-        Returns
-        -------
-        _type_
-            _description_
-        """
         self.compute_velocity()
         self.U.temp[:] = 0.5 * xp.abs(self.wfc)**2 * (self.U.Vx**2 + self.U.Vy**2 + self.U.Vz**2)
         return fns.integralr(self.U.temp.real, self.grid)
 
-     
     def omegak(self):   
-        """_summary_
-        """
         self.compute_velocity() 
         self.U.temp[:] = xp.abs(self.wfc)
         self.U.omegai_kx[:] = my_fft.forward_transform(self.U.temp * self.U.Vx)
@@ -305,12 +207,12 @@ class GPE():
 
 
     def KE_decomp(self):   
-        """_summary_
-
+        
+        """This function calculates the kinetic energy decomposition
         Returns
         -------
-        _type_
-            _description_
+        arrays
+            arrays containing the kinetic energy decomposition
         """
         self.omegak()
         if self.params.dim == 2:
@@ -323,15 +225,15 @@ class GPE():
         
     
     # For calculation of particle number flux
-    def compute_tk_particle_no(self):    
-        self.U.temp[:] = my_fft.forward_transform(self.wfc)
-        self.U.temp1[:] = my_fft.forward_transform(para.g * self.wfc * xp.abs(self.wfc)**2 + self.wfc * self.pot)
-        temp = (self.U.temp1[:] * xp.conjugate(self.U.temp)).imag
-        return self.binning(temp)
+    # def compute_tk_particle_no(self):    
+    #     self.U.temp[:] = my_fft.forward_transform(self.wfc)
+    #     self.U.temp1[:] = my_fft.forward_transform(self.params.g * self.wfc * xp.abs(self.wfc)**2 + self.wfc * self.pot)
+    #     temp = (self.U.temp1[:] * xp.conjugate(self.U.temp)).imag
+    #     return self.binning(temp)
     
-    def comp_par_no_spectrum(self):
-        self.U.temp[:] = xp.abs(my_fft.forward_transform(self.wfc))**2
-        return self.bining(self.U.temp)
+    # def comp_par_no_spectrum(self):
+    #     self.U.temp[:] = xp.abs(my_fft.forward_transform(self.wfc))**2
+    #     return self.bining(self.U.temp)
         
     def comp_KEcomp_spectrum(self):
         self.omegak()
@@ -341,12 +243,21 @@ class GPE():
         elif self.params.dim == 3:
             KE_incompk = 0.5 * (xp.abs(self.U.omegai_kx)**2 + xp.abs(self.U.omegai_ky)**2 + xp.abs(self.U.omegai_kz)**2) 
             KE_compk = 0.5 * (xp.abs(self.U.Vx)**2 + xp.abs(self.U.Vy)**2 + xp.abs(self.U.Vz)**2)
+
         KEcomp_spectrum = self.binning(KE_compk)
         KEincomp_spectrum = self.binning(KE_incompk)
+        # print (KE_compk[2], KE_incompk[2])
         return KEcomp_spectrum, KEincomp_spectrum
     
-    def comp_IE_spectrum(self):
-        self.U.temp[:] = my_fft.forward_transform(xp.abs(self.wfc)**2)
-        self.U.temp[:] = 0.5 * self.params.g * xp.abs(self.U.temp)**2
-        IE_spectrum = self.binning(self.U.temp)
-        return IE_spectrum   
+    # def comp_IE_spectrum(self):
+    #     self.U.temp[:] = my_fft.forward_transform(xp.abs(self.wfc)**2)
+    #     self.U.temp[:] = 0.5 * self.params.g * xp.abs(self.U.temp)**2
+    #     IE_spectrum = self.binning(self.U.temp)
+    #     return IE_spectrum   
+    
+    def binning(self, quantity):
+        quantity_s = xp.zeros(self.params.Nx//2)
+        for i in range(self.params.Nx//2):
+            z = xp.where((self.grid.ksqr**.5 >= self.grid.kxx[i]) & (self.grid.ksqr**.5 < self.grid.kxx[i+1]))        
+            quantity_s[i] = xp.sum(quantity[z])
+        return quantity_s
