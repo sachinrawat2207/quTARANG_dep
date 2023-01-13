@@ -8,7 +8,6 @@
 # C extensions
 *.so
 output/
-testgpe.py
 # Distribution / packaging
 .Python
 build/
