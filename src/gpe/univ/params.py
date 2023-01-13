@@ -1,3 +1,5 @@
+from gpe.set_device import *
+from pathlib import Path
 class Params:
     """ Class to store all necessary parameters of the simulation.
     """
@@ -8,7 +10,13 @@ class Params:
                 dt: float = 0.001,
                 tmax: float = 5,
                 scheme: str = 'TSSP',
-                itime: bool = True,
+                imgtime: bool = False,
+                rms: list = [False, 0, 100],
+                ektk: list = [False, 0, 100],
+                energy: list = [False, 0, 100],
+                wfc: list = [False, 0, 100],
+                gpu: bool = False,
+                gpu_rank: int = 0,
                 **kwargs) -> None:
         
         ## Store the parameters
@@ -21,23 +29,17 @@ class Params:
         self.tmax = tmax
         self.volume = self.Lx * self.Ly * self.Lz
         self.scheme = scheme
-        self.itime = itime
-       
-        self.save_rms = True
-        self.save_rms_start_step = 0
-        self.save_rms_iter_step = 100
-       
-        self.save_ektk = False
-        self.save_ektk_start_step = 0
-        self.save_ektk_iter_step = 100
+        self.imgtime = imgtime
+        self.gpu = gpu
+        self.gpu_rank = gpu_rank
         
-        self.save_en_start_step = 0
-        self.save_en_iter_step = 100
+        self.save_energy, self.save_en_start_step, self.save_en_iter_step = energy
+        self.save_rms, self.save_rms_start_step, self.save_rms_iter_step = rms
+        self.save_ektk, self.save_ektk_start_step, self.save_ektk_iter_step  =  ektk
+        self.save_wfc, self.save_wfc_start_step, self.save_wfc_iter_step = wfc
         
-        self.save_wfc = False
-        self.save_wfc_start_step = 0
-        self.save_wfc_iter_step = 100
-        
+        if self.gpu == True:
+            set_gpu(gpu_rank)
         ## Set the dimension
         if self.Nz == 1:
             if self.Ny == 1:
@@ -64,7 +66,7 @@ class Params:
             f"  dt: {self.dt}",
             f"  tmax: {self.tmax}",
             f"  Numerical Scheme: {self.scheme}",
-            f"  Imaginary Time: {self.itime}"
+            f"  Imaginary Time: {self.imgtime}"
             ])
         )
 

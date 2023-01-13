@@ -5,6 +5,7 @@ from gpe.univ.params import Params
 from gpe.univ import my_fft, fns
 from gpe import evolution
 
+
 class Vector_field():
     """_summary_
     """
@@ -188,7 +189,8 @@ class GPE():
     # def compute_rrms(self):   
     #     return (fns.integralr(xp.abs(self.wfc)**2 * (self.grid.xx**2 + self.grid.yy**2 + self.grid.zz**2), self.grid) - (fns.integralr(xp.abs(self.wfc)**2 * self.grid.zz, self.grid))**2)**.5
 
-    def compute_energy(self):     #C
+    def compute_energy(self):     
+
         """_summary_
 
         Returns
@@ -196,11 +198,12 @@ class GPE():
         _type_
             _description_
         """
-        self.self.U.temp[:] = my_fft.forward_transform(self.wfc) #for sstep_strang
+        self.U.temp[:] = my_fft.forward_transform(self.wfc) #for sstep_strang
         deriv = self.params.volume * xp.sum(self.grid.ksqr * xp.abs(self.U.temp)**2)  
         return fns.integralr(((self.pot + 0.5 * self.params.g * xp.abs(self.wfc)**2) * xp.abs(self.wfc)**2), self.grid) + deriv/2
     
-    def compute_quantum_energy(self):  #C 
+    def compute_quantum_energy(self):  
+ 
         """_summary_
 
         Returns
@@ -217,7 +220,8 @@ class GPE():
         return fns.integralr(self.U.temp.real, self.grid)
 
 
-    def comp_internal_energy(self):  #C 
+    def compute_internal_energy(self):  
+ 
         """_summary_
 
         Returns
@@ -228,7 +232,8 @@ class GPE():
         return 0.5 * self.params.g * fns.integralr(xp.abs(self.wfc)**4, self.grid)
         
 
-    def comp_potential_energy(self): #C 
+    def compute_potential_energy(self): 
+ 
         """_summary_
 
         Returns
@@ -238,7 +243,8 @@ class GPE():
         """  
         return fns.integralr(self.pot * xp.abs(self.wfc)**2, self.grid) 
         
-    def comp_velocity(self):   #C
+    def compute_velocity(self):   
+
         """_summary_
         """
         fns.gradient(self.wfc.conj(), self)
@@ -253,7 +259,7 @@ class GPE():
         return 
     
 
-    def comp_kinetic_energy(self):  # doubt while integrating in fourier space
+    def compute_kinetic_energy(self):  # doubt while integrating in fourier space
         """_summary_
 
         Returns
@@ -261,13 +267,15 @@ class GPE():
         _type_
             _description_
         """
-        self.comp_velocity()
+        self.compute_velocity()
         self.U.temp[:] = 0.5 * xp.abs(self.wfc)**2 * (self.U.Vx**2 + self.U.Vy**2 + self.U.Vz**2)
         return fns.integralr(self.U.temp.real, self.grid)
 
      
-    def omegak(self):   #C
-        self.comp_velocity() 
+    def omegak(self):   
+        """_summary_
+        """
+        self.compute_velocity() 
         self.U.temp[:] = xp.abs(self.wfc)
         self.U.omegai_kx[:] = my_fft.forward_transform(self.U.temp * self.U.Vx)
         self.U.omegai_ky[:] = my_fft.forward_transform(self.U.temp * self.U.Vy)
@@ -295,7 +303,14 @@ class GPE():
         return 
 
 
-    def KE_decomp(self):   #C
+    def KE_decomp(self):   
+        """_summary_
+
+        Returns
+        -------
+        _type_
+            _description_
+        """
         self.omegak()
         if self.params.dim == 2:
             KE_comp = 0.5 * fns.integralk(xp.abs(self.U.Vx)**2 + xp.abs(self.U.Vy)**2, self.params)
@@ -307,7 +322,7 @@ class GPE():
         
     
     # For calculation of particle number flux
-    def comp_tk_particle_no(self):    
+    def compute_tk_particle_no(self):    
         self.U.temp[:] = my_fft.forward_transform(self.wfc)
         self.U.temp1[:] = my_fft.forward_transform(para.g * self.wfc * xp.abs(self.wfc)**2 + self.wfc * self.pot)
         temp = (self.U.temp1[:] * xp.conjugate(self.U.temp)).imag

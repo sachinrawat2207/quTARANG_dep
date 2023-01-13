@@ -1,7 +1,7 @@
 from gpe.univ import my_fft
 from gpe.set_device import xp
-import gpe.io_op as io_op
-
+import gpe.in_op as in_op
+from pathlib import Path
 #-----------------------------------------TSSP scheme-----------------------------------------
 def tssp_stepr(G, dt: float):
     return G.wfc * xp.exp(-1j * (G.pot + G.params.g  * (G.wfc * G.wfc.conj())) * dt)
@@ -39,9 +39,9 @@ def compute_RHS(G, psik):
 def set_scheme(G):
     global time_adv
     if G.params.scheme == 'TSSP':
-        if G.params.itime == False:
+        if G.params.imgtime == False:
             time_adv = time_adv_strang
-        elif G.params.itime == True:
+        elif G.params.imgtime == True:
             time_adv = time_adv_istrang
     else:
         print("Please choose the correct scheme")
@@ -50,15 +50,17 @@ def set_scheme(G):
 
 def time_advance_ms(G):
     time_adv(G)
-
+    
 def time_advance(G):
     t = 0 
+    in_op.gen_path(Path.cwd()) 
+    
     for i in range(G.params.nstep):
 
         if(G.params.save_wfc == True and i >= G.params.save_wfc_start_step and (i - G.params.save_wfc_start_step)%G.params.save_wfc_iter_step == 0):
             in_op.save_wfc(G, t)
             
-        if(i >= G.params.save_en_start_step and (i - G.params.save_en_start_step)%G.params.save_en_iter_step == 0):
+        if(G.params.save_energy == True and i >= G.params.save_en_start_step and (i - G.params.save_en_start_step)%G.params.save_en_iter_step == 0):
             in_op.compute_energy(G, t)
         
         if(G.params.save_ektk == True and i >= G.params.save_ektk_start_step and (i - G.params.save_ektk_start_step)%G.params.save_ektk_iter_step == 0):
@@ -73,10 +75,10 @@ def time_advance(G):
         t += G.params.dt
         time_adv(G)
 
-    in_op.save_energy(G)
-    in_op.compute_energy(G, t)
-    
-    if G.para.save_wfc == True:
+    if (G.params.save_energy): 
+        in_op.compute_energy(G, t)
+        in_op.save_energy(G)
+    if G.params.save_wfc == True:
         in_op.save_wfc(G, t)
         
     if G.params.save_rms == True:

@@ -14,9 +14,9 @@ def set_init(x, y=0, z=0):
     V = 1/2*(x**2 + 4*y**2 * 16*z**2)
     return wfc, V
 
-par = Params(N = [32, 32, 1], L = [16, 16, 1], g = 0.1, dt=0.001)
+par = Params(N = [32, 32, 1], L = [16, 16, 1], g = 0.1, dt=0.001, tmax = 0.1, energy = [True, 0, 100])
 print(par)
 gpe = GPE(par, set_init)
-# gpe.evolve()
+gpe.evolve()
 
 print(type(gpe.wfc), gpe.wfc.shape)
