@@ -1,6 +1,6 @@
 from gpe.univ import my_fft
 from gpe.set_device import xp
-
+import gpe.io_op as io_op
 
 #-----------------------------------------TSSP scheme-----------------------------------------
 def tssp_stepr(G, dt: float):
@@ -37,6 +37,7 @@ def compute_RHS(G, psik):
 #-----------------------------------------Time Advance-----------------------------------------
 
 def set_scheme(G):
+    global time_adv
     if G.params.scheme == 'TSSP':
         if G.params.itime == False:
             time_adv = time_adv_strang

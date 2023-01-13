@@ -3,8 +3,15 @@ from gpe.set_device import xp
 
 class Grid:
     def __init__(self, params: Params) -> None:
+        """Stores the grid for the simulation.
+
+        Parameters
+        ----------
+        params : Params object
+        """
         self.setup_grid(params)
         self.setup_meshgrid(params)
+        self.volume = params.volume
     
     def setup_grid(self, params: Params):
         if params.dim >= 1:
@@ -23,6 +30,8 @@ class Grid:
             self.dkV *= self.dkz
         
     def setupX(self, params: Params):
+        """Setup grid along x.
+        """
         self.x = xp.arange(-params.Nx//2, params.Nx//2)
         self.kx = 2 * xp.pi * xp.roll(self.x, params.Nx//2)/params.Lx
         self.x = self.x * params.Lx/params.Nx
@@ -30,6 +39,8 @@ class Grid:
         self.dkx = 2 * xp.pi/params.Lx
     
     def setupY(self, params: Params):
+        """Setup grid along y.
+        """
         self.y = xp.arange(-params.Ny//2, params.Ny//2)
         self.ky = 2 * xp.pi * xp.roll(self.y, params.Ny//2)/params.Ly
         self.y = self.y * params.Ly/params.Ny
@@ -37,6 +48,8 @@ class Grid:
         self.dky = 2 * xp.pi/params.Ly
 
     def setupZ(self, params: Params):
+        """Setup grid along x.
+        """
         self.z = xp.arange(-params.Nz//2, params.Nz//2)
         self.kz = 2 * xp.pi * xp.roll(self.z, params.Nz//2)/params.Lz
         self.z = self.z * params.Lz/params.Nz
@@ -44,6 +57,8 @@ class Grid:
         self.dkz = 2 * xp.pi/params.Lz
     
     def setup_meshgrid(self, params):
+        """Generates the mesh for the simulation.
+        """
         if params.dim == 1:
             self.xx = self.x
             self.kxx = self.kx

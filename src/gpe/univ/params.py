@@ -1,6 +1,5 @@
 class Params:
-    """
-    Class to store all necessary parameters of the simulation.
+    """ Class to store all necessary parameters of the simulation.
     """
     def __init__(self,
                 N: list = [128, 1, 1],
@@ -19,6 +18,7 @@ class Params:
         self.real_dtype = kwargs.get('real_dtype','float')
         self.complex_dtype = kwargs.get('complex_dtype','complex')
         self.dt = dt
+        self.tmax = tmax
         self.volume = self.Lx * self.Ly * self.Lz
         self.scheme = scheme
         self.itime = itime
@@ -34,7 +34,7 @@ class Params:
         self.save_en_start_step = 0
         self.save_en_iter_step = 100
         
-        self.save_wfc == False
+        self.save_wfc = False
         self.save_wfc_start_step = 0
         self.save_wfc_iter_step = 100
         
@@ -56,9 +56,16 @@ class Params:
         """
         return("\n".join([
             "Parameters:",
+            f"  dim : {self.dim}",
             f"  (Nx, Ny, Nz): ({self.Nx}, {self.Ny}, {self.Nz})",
             f"  (Lx, Ly, Lz): ({self.Lx}, {self.Ly}, {self.Lz})",
-            f"  g : {self.g }"])
+            f"  Volume : {self.volume}",
+            f"  g : {self.g}",
+            f"  dt: {self.dt}",
+            f"  tmax: {self.tmax}",
+            f"  Numerical Scheme: {self.scheme}",
+            f"  Imaginary Time: {self.itime}"
+            ])
         )
 
 

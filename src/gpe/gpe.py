@@ -6,6 +6,8 @@ from gpe.univ import my_fft, fns
 from gpe import evolution
 
 class Vector_field():
+    """_summary_
+    """
     Vx = []
     Vx = []  
     Vy = []
@@ -100,32 +102,85 @@ class GPE():
         self.Npar = self.compute_norm()
     
     def compute_norm(self):
+        """_summary_
+
+        Returns
+        -------
+        _type_
+            _description_
+        """
         return fns.integral(xp.abs(self.wfc)**2, self.grid)**0.5
     
     def renormalize(self, normFact: float = 1.0):
+        """_summary_
+
+        Parameters
+        ----------
+        normFact : float, optional
+            _description_, by default 1.0
+        """
         self.wfc = normFact * self.wfc/self.compute_norm()
     
     def evolve(self):
+        """_summary_
+        """
         evolution.time_advance(self)
     
     def evolve_ms(self):
+        """_summary_
+        """
         evolution.time_advance_ms(self)    
     
     def compute_chempot(self):   
+        """_summary_
+
+        Returns
+        -------
+        _type_
+            _description_
+        """
         self.U.temp[:] = my_fft.forward_transform(self.wfc) #for sstep_strang
         deriv = self.params.volume * xp.sum(self.grid.ksqr * xp.abs(self.U.temp)**2)  
         return fns.integral(((self.pot + self.params.g * xp.abs(self.wfc)**2) * xp.abs(self.wfc)**2), self.grid) + deriv/2
     
     def compute_xrms(self):
+        """_summary_
+
+        Returns
+        -------
+        _type_
+            _description_
+        """
         return (fns.integral(xp.abs(self.wfc)**2 * self.grid.xx**2, self.grid) - (fns.integral(xp.abs(self.wfc)**2 * self.grid.xx, self.grid))**2)**.5
         
     def compute_yrms(self):
+        """_summary_
+
+        Returns
+        -------
+        _type_
+            _description_
+        """
         return (fns.integral(xp.abs(self.wfc)**2 * self.grid.yy**2, self.grid) - (fns.integral(xp.abs(self.wfc)**2 * self.grid.yy, self.grid))**2)**.5   
 
-    def compute_zrms(self):   
+    def compute_zrms(self):  
+        """_summary_
+
+        Returns
+        -------
+        _type_
+            _description_
+        """
         return (fns.integral(xp.abs(self.wfc)**2 * self.grid.zz**2, self.grid) - (fns.integral(xp.abs(self.wfc)**2 * self.grid.zz, self.grid))**2)**.5
     
     def compute_rrms(self):
+        """_summary_
+
+        Returns
+        -------
+        _type_
+            _description_
+        """
         if self.params.dim == 2:
             return (fns.integral(xp.abs(self.wfc) ** 2 * (self.grid.xx**2 + self.grid.yy**2), self.grid))**.5
         return (fns.integral(xp.abs(self.wfc) ** 2 * (self.grid.xx**2 + self.grid.yy**2 + self.grid.zz**2), self.grid))**.5
@@ -134,11 +189,25 @@ class GPE():
     #     return (fns.integral(xp.abs(self.wfc)**2 * (self.grid.xx**2 + self.grid.yy**2 + self.grid.zz**2), self.grid) - (fns.integral(xp.abs(self.wfc)**2 * self.grid.zz, self.grid))**2)**.5
 
     def compute_energy(self):     #C
+        """_summary_
+
+        Returns
+        -------
+        _type_
+            _description_
+        """
         self.self.U.temp[:] = my_fft.forward_transform(self.wfc) #for sstep_strang
         deriv = self.params.volume * xp.sum(self.grid.ksqr * xp.abs(self.U.temp)**2)  
         return fns.integral(((self.pot + 0.5 * self.params.g * xp.abs(self.wfc)**2) * xp.abs(self.wfc)**2), self.grid) + deriv/2
     
     def compute_quantum_energy(self):  #C 
+        """_summary_
+
+        Returns
+        -------
+        _type_
+            _description_
+        """
         fns.gradient(xp.abs(self.wfc), self)
         if self.params.dim == 2:
             self.U.temp[:] = 0.5 * (self.U.Vx**2 + self.U.Vy**2) 
@@ -149,13 +218,29 @@ class GPE():
 
 
     def comp_internal_energy(self):  #C 
-        return 0.5 * para.g * fns.integral(xp.abs(self.wfc)**4, self.grid)
+        """_summary_
+
+        Returns
+        -------
+        _type_
+            _description_
+        """
+        return 0.5 * self.params.g * fns.integral(xp.abs(self.wfc)**4, self.grid)
         
 
-    def comp_potential_energy(self): #C   
+    def comp_potential_energy(self): #C 
+        """_summary_
+
+        Returns
+        -------
+        _type_
+            _description_
+        """  
         return fns.integral(self.pot * xp.abs(self.wfc)**2, self.grid) 
         
     def comp_velocity(self):   #C
+        """_summary_
+        """
         fns.gradient(self.wfc.conj(), self)
         if self.params.dim == 2:
             self.U.Vx[:] = -(self.wfc * self.U.Vx).imag/xp.abs(self.wfc)**2 
@@ -169,6 +254,13 @@ class GPE():
     
 
     def comp_kinetic_energy(self):  # doubt while integrating in fourier space
+        """_summary_
+
+        Returns
+        -------
+        _type_
+            _description_
+        """
         self.comp_velocity()
         self.U.temp[:] = 0.5 * xp.abs(self.wfc)**2 * (self.U.Vx**2 + self.U.Vy**2 + self.U.Vz**2)
         return fns.integral(self.U.temp.real, self.grid)
@@ -177,29 +269,29 @@ class GPE():
     def omegak(self):   #C
         self.comp_velocity() 
         self.U.temp[:] = xp.abs(self.wfc)
-        U.omegai_kx[:] = my_fft.forward_transform(self.U.temp * self.U.Vx)
-        U.omegai_ky[:] = my_fft.forward_transform(self.U.temp * self.U.Vy)
-        U.omegai_kz[:] = my_fft.forward_transform(self.U.temp * self.U.Vz)
+        self.U.omegai_kx[:] = my_fft.forward_transform(self.U.temp * self.U.Vx)
+        self.U.omegai_ky[:] = my_fft.forward_transform(self.U.temp * self.U.Vy)
+        self.U.omegai_kz[:] = my_fft.forward_transform(self.U.temp * self.U.Vz)
         if self.params.dim == 2:
             self.grid.ksqr[0, 0] = 1
-            self.U.temp[:] = (self.grid.kxx * U.omegai_kx + self.grid.kyy * U.omegai_ky)/self.grid.ksqr
+            self.U.temp[:] = (self.grid.kxx * self.U.omegai_kx + self.grid.kyy * self.U.omegai_ky)/self.grid.ksqr
             # Compressible part calculation
             self.U.Vx[:] = self.grid.kxx * self.U.temp
             self.U.Vy[:] = self.grid.kyy * self.U.temp       
             self.grid.ksqr[0, 0] = 0   
-            U.omegai_kx[:] = U.omegai_kx - self.U.Vx
-            U.omegai_ky[:] = U.omegai_ky - self.U.Vy
+            self.U.omegai_kx[:] = self.U.omegai_kx - self.U.Vx
+            self.U.omegai_ky[:] = self.U.omegai_ky - self.U.Vy
         else:
             self.grid.ksqr[0, 0, 0] = 1 
-            self.U.temp[:] = (self.grid.kxx * U.omegai_kx + self.grid.kyy * U.omegai_ky + self.grid.kzz * U.omegai_kz)/self.grid.ksqr
+            self.U.temp[:] = (self.grid.kxx * self.U.omegai_kx + self.grid.kyy * self.U.omegai_ky + self.grid.kzz * self.U.omegai_kz)/self.grid.ksqr
             # Compressible part calculation
             self.U.Vx[:] = self.grid.kxx * self.U.temp
             self.U.Vy[:] = self.grid.kyy * self.U.temp
             self.U.Vz[:] = self.grid.kzz * self.U.temp
             self.grid.ksqr[0, 0, 0] = 0 
-            U.omegai_kx[:] = U.omegai_kx - self.U.Vx
-            U.omegai_ky[:] = U.omegai_ky - self.U.Vy
-            U.omegai_kz[:] = U.omegai_kz - self.U.Vz
+            self.U.omegai_kx[:] = self.U.omegai_kx - self.U.Vx
+            self.U.omegai_ky[:] = self.U.omegai_ky - self.U.Vy
+            self.U.omegai_kz[:] = self.U.omegai_kz - self.U.Vz
         return 
 
 
@@ -207,10 +299,10 @@ class GPE():
         self.omegak()
         if self.params.dim == 2:
             KE_comp = 0.5 * fns.integral_k(xp.abs(self.U.Vx)**2 + xp.abs(self.U.Vy)**2, self.params)
-            KE_incomp = 0.5 * fns.integral_k(xp.abs(U.omegai_kx)**2 + xp.abs(U.omegai_ky)**2, self.params)
+            KE_incomp = 0.5 * fns.integral_k(xp.abs(self.U.omegai_kx)**2 + xp.abs(self.U.omegai_ky)**2, self.params)
         else:
             KE_comp = 0.5 * fns.integral_k(xp.abs(self.U.Vx)**2 + xp.abs(self.U.Vy)**2 + xp.abs(self.U.Vz)**2, self.params)
-            KE_incomp = 0.5 * fns.integral_k(xp.abs(U.omegai_kx)**2 + xp.abs(U.omegai_ky)**2 + xp.abs(U.omegai_kz)**2, self.params)
+            KE_incomp = 0.5 * fns.integral_k(xp.abs(self.U.omegai_kx)**2 + xp.abs(self.U.omegai_ky)**2 + xp.abs(self.U.omegai_kz)**2, self.params)
         return KE_comp, KE_incomp 
         
     
@@ -228,10 +320,10 @@ class GPE():
     def comp_KEcomp_spectrum(self):
         self.omegak()
         if self.params.dim == 2:
-            KE_incompk = 0.5 * (xp.abs(U.omegai_kx)**2 + xp.abs(U.omegai_ky)**2) 
+            KE_incompk = 0.5 * (xp.abs(self.U.omegai_kx)**2 + xp.abs(self.U.omegai_ky)**2) 
             KE_compk = 0.5 * (xp.abs(self.U.Vx)**2 + xp.abs(self.U.Vy)**2)
         elif self.params.dim == 3:
-            KE_incompk = 0.5 * (xp.abs(U.omegai_kx)**2 + xp.abs(U.omegai_ky)**2 + xp.abs(U.omegai_kz)**2) 
+            KE_incompk = 0.5 * (xp.abs(self.U.omegai_kx)**2 + xp.abs(self.U.omegai_ky)**2 + xp.abs(self.U.omegai_kz)**2) 
             KE_compk = 0.5 * (xp.abs(self.U.Vx)**2 + xp.abs(self.U.Vy)**2 + xp.abs(self.U.Vz)**2)
         KEcomp_spectrum = self.binning(KE_compk)
         KEincomp_spectrum = self.binning(KE_incompk)
@@ -239,6 +331,6 @@ class GPE():
     
     def comp_IE_spectrum(self):
         self.U.temp[:] = my_fft.forward_transform(xp.abs(self.wfc)**2)
-        self.U.temp[:] = 0.5 * para.g * xp.abs(self.U.temp)**2
+        self.U.temp[:] = 0.5 * self.params.g * xp.abs(self.U.temp)**2
         IE_spectrum = self.binning(self.U.temp)
         return IE_spectrum   

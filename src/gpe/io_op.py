@@ -7,8 +7,6 @@ from gpe.set_device import xp
 from gpe.univ import fns
 
 
-path = Path(para.op_path)
-
 # directory generation
 def gen_path():
     if not path.exists():
@@ -19,14 +17,14 @@ def gen_path():
 
 # Function for input
 def set_initcond(G):
-    file_name = Path(para.in_path)/para.filename
+    file_name = Path(G.params.in_path)/G.params.filename
     f = hp.File(file_name, 'r')
-    if para.device == 'cpu':
+    if G.params.device == 'cpu':
         G.wfc = f['wfc']
         G.V = f['V']
-    elif para.device == 'gpu':
-        G.wfc = ncp.asarray(f['wfc']) 
-        G.V = ncp.asarray(f['V'])
+    elif G.params.device == 'gpu':
+        G.wfc = xp.asarray(f['wfc']) 
+        G.V = xp.asarray(f['V'])
     f.close()
     
     
