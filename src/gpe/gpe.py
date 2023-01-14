@@ -6,7 +6,7 @@ from gpe.univ import my_fft, fns
 from gpe import evolution
 
 class Vector_field():
-    """It contains the variables which helps to calculate the different physical quantities of gpe class 
+    """It contains the variables which helps to calculate the different physical quantities of GPE class 
     """
     Vx = []
     Vx = []  
@@ -46,22 +46,54 @@ class Vector_field():
             self.temp1 = xp.zeros((params.Nx, params.Ny, params.Nz), dtype = params.complex_dtype)
 
 class GPE():
-    """It contains the functions which calculates the quantities
+    """Main class for the simulation. 
     """
     def __init__(self, params: Params):
+        """Intialisation of the GPE class.
+
+        Parameters
+        ----------
+        params : Params
+        
+        Attributes
+        ----------
+        params : an instance of the Params class for simulation
+        grid : Sets up the grid using Grid class
+        wfc : Wavefunction
+        wfck : Fourier tranform of the wavefunction
+        pot : Potential of the system
+        Npar : Number of particles
+        total_energy : Total energy of the system
+        total_KE : Total kinetic energy of the system
+        quantum_energy : Quantum pressure energy
+        potential_energy : Potential energy
+        internal_energy : Internal/Interaction energy
+        comp_KE : compressible kinetic energy
+        incomp_KE : incompressible kinetic energy
+        t_energy : ??
+        KEcomp_spec : Spectrum of compressible kinetic energy
+        KEincomp_spec : Spectrum of incompressible kinetic energy
+        tk_par_no : ??
+        t_ektk : ??
+        xrms : root mean square size of the condensate along the x direction
+        yrms : root mean square size of the condensate along the y direction
+        zrms : root mean square size of the condensate along the z direction
+        t_rms : ??
+        """
+
         self.params = params
         self.grid = Grid(params)
         self.wfc = []
         self.wfck = []
-        self.Npar = 0
         self.pot = []
-        self.comp_KE = []
-        self.incomp_KE = []
-        self.quantum_energy = []
-        self.internal_energy = []
+        self.Npar = 0
         self.total_energy = []
         self.total_KE = []
+        self.quantum_energy = []
         self.potential_energy = []
+        self.internal_energy = []
+        self.comp_KE = []
+        self.incomp_KE = []
         self.t_energy = []
         
         self.KEcomp_spec = []
@@ -77,9 +109,11 @@ class GPE():
         self.U = Vector_field(params)
         self.set_arrays()
         # self.set_init(set_init)
-        evolution.set_scheme(self)  
+        evolution.set_scheme(self) 
         
     def set_arrays(self):
+        """Setup numpy/cupy arrays for wfc, wfck and pot for the simulation.
+        """
         if self.params.dim == 1:
             self.wfc = xp.zeros((self.params.Nx), dtype = self.params.complex_dtype)
             self.wfck = xp.zeros((self.params.Nx), dtype = self.params.complex_dtype)
@@ -95,6 +129,14 @@ class GPE():
             self.pot = xp.zeros((self.params.Nx, self.params.Ny, self.params.Nz), dtype = self.params.real_dtype)
     
     def set_init(self, fun): #C
+        """Initial setup of wavefunction and potential for the simulation.
+        Also, computes the value of the initial number of particles in the system.
+
+        Parameters
+        ----------
+        fun : function
+            returns the functional form of the wavefunction and potential.
+        """
         if self.params.dim == 1:
             self.wfc[:], self.pot[:] = fun(self.grid.xx)
         
@@ -107,9 +149,23 @@ class GPE():
     
     
     def compute_norm(self):  #C
+        """Computes the normalisation constant for the current wavefunction.
+
+        Returns
+        -------
+        float
+            Normalisation constant
+        """
         return fns.integralr(xp.abs(self.wfc)**2, self.grid)**0.5
     
     def renormalize(self, normFact: float = 1.0):   #C
+        """Renormalisation of the wavefunction.
+
+        Parameters
+        ----------
+        normFact : float, optional
+            The new normalisation constant of the wavefunction, by default 1.0
+        """
         self.wfc = normFact * self.wfc/self.compute_norm()
     
     def evolve(self):   
