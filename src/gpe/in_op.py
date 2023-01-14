@@ -11,7 +11,8 @@ def gen_path(file_loc):
 
     if not (path/'wfc').exists():   
         os.mkdir(path/'wfc')
-
+    
+    
 # # Function for input
 # def set_initcond(G):
 #     file_name = Path(G.params.in_path)/G.params.filename
