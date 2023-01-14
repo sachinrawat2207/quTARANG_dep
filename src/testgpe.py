@@ -55,7 +55,7 @@ def set_init2D(x, y=0, z=0):
 print(par)
 xp.random.seed(0)
 G.set_init(set_init_tsubota)
-
+G.evolve()
 for i in range(1):
     
     comp, incomp = G.KE_decomp()

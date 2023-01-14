@@ -69,10 +69,7 @@ def time_advance(G):
             in_op.compute_ektk(G, t)
 
         if(G.params.save_rms == True and i >= G.params.save_rms_start_step and  (i - G.params.save_rms_start_step)%G.params.save_rms_iter_step == 0):
-            G.xrms.append(G.compute_xrms())
-            G.yrms.append(G.compute_yrms())
-            G.zrms.append(G.compute_zrms())
-            G.t_rms.append(t)
+            in_op.compute_ektk(G, t)
         
         t += G.params.dt
         time_adv(G)
