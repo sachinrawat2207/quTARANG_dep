@@ -4,9 +4,35 @@ import gpe.in_op as in_op
 
 #-----------------------------------------TSSP scheme-----------------------------------------
 def tssp_stepr(G, dt: float):
+    """Step of the TSSP Scheme to be taken in real space
+
+    Parameters
+    ----------
+    G : GPE class
+    dt : float
+        Time step
+
+    Returns
+    -------
+    ndarray
+        wavefunction after evolution
+    """
     return G.wfc * xp.exp(-1j * (G.pot + G.params.g  * (G.wfc * G.wfc.conj())) * dt)
 
 def tssp_stepk(G, dt: float):
+    """Step of the TSSP Scheme to be taken in k space
+
+    Parameters
+    ----------
+    G : GPE class
+    dt : float
+        Time step
+
+    Returns
+    -------
+    ndarray
+        wavefunction after evolution
+    """
     return G.wfck * xp.exp(-0.5j * G.grid.ksqr * dt)
 
 # For real time evolution
