@@ -1,6 +1,9 @@
 import numpy as xp
 import pyfftw.interfaces.numpy_fft as fft
 
+# from cupyx.fallback_mode import numpy as xp
+# fft = xp.fft
+# from cupyx.fallback_mode.numpy import fft
 
 def set_gpu(rank=0):
     """Initial setup for GPU run. Sets xp to cupy, fft to cupy.fft and fixes which GPU to use when multiple GPUs are available.

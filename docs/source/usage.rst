@@ -5,8 +5,8 @@ Running quTARANG
 
 Packages Required
 -----------------
-One can run quTARANG in a single cpu as well as single gpu. You need to set that inside the ``para.py`` file whoose descripsion is given in the 
-subsequent section. 
+One can run quTARANG in a single cpu as well as single gpu.
+
 You need the following libraries to run quTARANG:
 
 pathlib, h5py, shutils, numpy. 
