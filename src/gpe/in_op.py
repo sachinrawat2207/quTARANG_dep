@@ -4,6 +4,13 @@ from gpe.set_device import xp
 
 # directory generation
 def gen_path(file_loc):
+    """Generate path to used for data storage.
+
+    Parameters
+    ----------
+    file_loc : _type_
+        _description_
+    """
     global path
     path = file_loc/'output'
     if not path.exists():
@@ -26,8 +33,15 @@ def gen_path(file_loc):
 #     f.close()
     
     
-# Function to store the wavefunction   
 def save_wfc(G, t):
+    """Function to store the wavefunction.  
+
+    Parameters
+    ----------
+    G : GPE object
+    t : float
+        Time at which to save.
+    """
     filename = path/('wfc/' + 'wfc_t%f.hdf5' %t)
     f = hp.f = hp.File(filename, 'w')
     if G.params.gpu == True:
@@ -39,6 +53,14 @@ def save_wfc(G, t):
 
 
 def compute_energy(G, t):
+    """Function to compute the total, kinetic, quantum and total energy. Also computes components of kinetic energy.
+
+    Parameters
+    ----------
+    G : GPE
+    t : float
+        Time at which to save.
+    """
     norm = G.compute_norm()**2
     # comp_KE, incomp_KE = G.KE_decomp()
     if G.params.gpu == True:
@@ -63,6 +85,14 @@ def compute_energy(G, t):
     print(t, G.params.dt, G.total_energy[-1])
     
 def compute_ektk(G, t):
+    """_summary_
+
+    Parameters
+    ----------
+    G : GPE object
+    t : float
+        Time at which to save.
+    """
     KEcomp_spec, KEincomp_spec = G.comp_KEcomp_spectrum()
     if G.params.gpu == True:
         G.KEcomp_spec.append(xp.asnumpy(KEcomp_spec))
@@ -76,6 +106,14 @@ def compute_ektk(G, t):
         G.t_ektk.append(t)
 
 def compute_rms(G, t):
+    """_summary_
+
+    Parameters
+    ----------
+    G : GPE object
+    t : float
+        Time at which to save.
+    """
     if G.params.gpu == True:
         G.xrms.append(xp.asnumpy(G.comp_xrms()))
         G.yrms.append(xp.asnumpy(G.comp_yrms()))
@@ -91,6 +129,12 @@ def compute_rms(G, t):
         G.t_rms.append(t)
     
 def save_ektk(G):
+    """_summary_
+
+    Parameters
+    ----------
+    G : GPE object
+    """
     filename = path/'ektk.hdf5'
     f = hp.f = hp.File(filename, 'w')
     f.create_dataset('KEcomp_spec', data = G.KEcomp_spec)
@@ -99,6 +143,12 @@ def save_ektk(G):
     # f.create_dataset('t_ektk', data = G.t_ektk)
         
 def save_rms(G):
+    """_summary_
+
+    Parameters
+    ----------
+    G : GPE object
+    """
     filename = path/'rms.hdf5'
     f = hp.f = hp.File(filename, 'w')
     f.create_dataset('xrms', data = G.xrms)
@@ -110,6 +160,12 @@ def save_rms(G):
 
 # Function to store the energy
 def save_energy(G):
+    """_summary_
+
+    Parameters
+    ----------
+    G : GPE object
+    """
     filename = path/'energies.h5'
     f = hp.File(filename, 'w')
     # f.create_dataset('Comp_KE', data = G.comp_KE)
