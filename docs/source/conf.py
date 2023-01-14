@@ -13,8 +13,8 @@ print(path)
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'quTARANG'
-copyright = '2023, S.S. Rawat, S.K. Kha'
-author = 'S.S. Rawat, S.K. Kha'
+copyright = '2023, S.S. Rawat, S.K. Jha'
+author = 'S.S. Rawat, S.K. Jha'
 release = '0.0.1'
 
 # -- General configuration ---------------------------------------------------
@@ -23,15 +23,25 @@ release = '0.0.1'
 extensions = ['sphinx_copybutton',
 'sphinx.ext.duration',
 'sphinx.ext.doctest',
-'sphinx.ext.autodoc',]
+'sphinx.ext.autodoc',
+'sphinxcontrib.bibtex',
+'sphinx.ext.autosummary', 
+'sphinx_design']
+
+bibtex_bibfiles = ['refs.bib']
 
 templates_path = ['_templates']
 exclude_patterns = []
+numfig = True
+math_numfig = True
 
-
+autosummary_generate = True
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
+
+# def setup(app):
+#     app.add_css_file('css/custom.css')

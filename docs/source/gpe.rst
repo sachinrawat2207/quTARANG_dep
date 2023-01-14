@@ -28,10 +28,10 @@ gpe.gpe module
    :undoc-members:
    :show-inheritance:
 
-gpe.in\_op module
+gpe.IO module
 -----------------
 
-.. automodule:: gpe.in_op
+.. automodule:: gpe.IO
    :members:
    :undoc-members:
    :show-inheritance:

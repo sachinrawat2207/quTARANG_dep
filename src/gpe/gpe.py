@@ -6,7 +6,7 @@ from gpe.univ import my_fft, fns
 from gpe import evolution
 
 class Vector_field():
-    """It contains the variables which helps to calculate the different physical quantities of GPE class 
+    """ It contains the variables which helps to calculate the different physical quantities of GPE class 
     """
     Vx = []
     Vx = []  
@@ -70,15 +70,14 @@ class GPE():
         internal_energy : Internal/Interaction energy
         comp_KE : compressible kinetic energy
         incomp_KE : incompressible kinetic energy
-        t_energy : ??
+        t_energy : Time at which energy is calculated
         KEcomp_spec : Spectrum of compressible kinetic energy
         KEincomp_spec : Spectrum of incompressible kinetic energy
-        tk_par_no : ??
-        t_ektk : ??
+        t_ektk : time to save ektk(energy spectr)
         xrms : root mean square size of the condensate along the x direction
         yrms : root mean square size of the condensate along the y direction
         zrms : root mean square size of the condensate along the z direction
-        t_rms : ??
+        t_rms : Time at which rms values are calculating
         """
 
         self.params = params
@@ -98,7 +97,6 @@ class GPE():
         
         self.KEcomp_spec = []
         self.KEincomp_spec = []
-        self.tk_par_no = []
         self.t_ektk = []
         
         self.xrms = []
@@ -128,9 +126,8 @@ class GPE():
             self.wfc = xp.zeros((self.params.Nx, self.params.Ny, self.params.Nz), dtype = self.params.complex_dtype)
             self.pot = xp.zeros((self.params.Nx, self.params.Ny, self.params.Nz), dtype = self.params.real_dtype)
     
-    def set_init(self, fun): #C
+    def set_init(self, wfc_function, pot_function): #C
         """Initial setup of wavefunction and potential for the simulation.
-        Also, computes the value of the initial number of particles in the system.
 
         Parameters
         ----------
@@ -138,15 +135,14 @@ class GPE():
             returns the functional form of the wavefunction and potential.
         """
         if self.params.dim == 1:
-            self.wfc[:], self.pot[:] = fun(self.grid.xx)
+            self.wfc[:], self.pot[:] = wfc_function(self.grid.xx), pot_function(self.grid.xx)
         
         if self.params.dim == 2:
-            self.wfc[:], self.pot[:] = fun(self.grid.xx, self.grid.yy)
+            self.wfc[:], self.pot[:] = wfc_function(self.grid.xx, self.grid.yy), pot_function(self.grid.xx, self.grid.yy)
         
         if self.params.dim == 3:
-            self.wfc[:], self.pot[:] = fun(self.grid.xx, self.grid.yy, self.grid.zz)
-        self.Npar = self.compute_norm()
-    
+            self.wfc[:], self.pot[:] = wfc_function(self.grid.xx, self.grid.yy, self.grid.zz), pot_function(self.grid.xx, self.grid.yy, self.grid.zz)
+        # self.Npar = self.compute_norm()
     
     def compute_norm(self):  #C
         """Computes the normalisation constant for the current wavefunction.
@@ -269,6 +265,7 @@ class GPE():
     def KE_decomp(self):   
         """
         This function calculates the kinetic energy decomposition
+        
         Returns
         -------
         arrays

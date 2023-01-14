@@ -1,5 +1,6 @@
 from gpe.set_device import set_gpu
 from pathlib import Path
+
 class Params:
     """ Class to store all necessary parameters of the simulation.
     """
@@ -17,7 +18,7 @@ class Params:
                 wfc: list = [False, 0, 100],
                 gpu: bool = False,
                 gpu_rank: int = 0,
-                output_path: str = Path.cwd(),
+                path: str = str(Path.cwd()/'output'),
                 **kwargs) -> None:
         """
         Parameters
@@ -52,7 +53,7 @@ class Params:
         self.gpu = gpu
         self.gpu_rank = gpu_rank
         
-        self.output_path = Path(output_path)
+        self.path = Path(path)
         self.save_energy, self.save_en_start_step, self.save_en_iter_step = energy
         self.save_rms, self.save_rms_start_step, self.save_rms_iter_step = rms
         self.save_ektk, self.save_ektk_start_step, self.save_ektk_iter_step  =  ektk

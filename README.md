@@ -1,3 +1,8 @@
 # quTARANG
 
-A Gross-Piatevskii equation solver written in python with support for both CPUs as well as GPUs. 
+A Gross-Piatevskii equation solver having capablities of running on GPU and CPU. 
+
+### Features
+- 
+
+

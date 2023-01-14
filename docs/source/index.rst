@@ -17,6 +17,7 @@ Introduction to quTARANG
    introduction
    Numerical scheme <scheme>
    Running quTARANG <usage>
+   Important functions <functions>
    Examples <examples>
    Analysis <analysis>
    modules <modules>

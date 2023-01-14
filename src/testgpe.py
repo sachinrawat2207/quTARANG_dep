@@ -3,13 +3,14 @@ from gpe.univ.params import Params
 from gpe.set_device import xp
 from gpe.univ import my_fft
 from gpe import gpe
+import h5py as hp
 
 N = [256, 256, 1]
 L = [29.84, 29.84, 1]
 ektk = [True, 0, 10000000]
 wfc = [True, 0, 100000]
 
-par = Params(N, L, g = 2, dt=0.0001, tmax = 1, energy = [True, 0, 100], ektk = ektk, wfc = wfc, path = '/home/Desktop/test')
+par = Params(N, L, g = 2, dt=0.0001, tmax = 0.0002, energy = [True, 0, 100], ektk = ektk, path = '/home/sachinr/Desktop/test/temp')
 G = gpe.GPE(par)
 
 def set_init(x, y=0):
@@ -47,21 +48,29 @@ def set_init_tsubota(x, y=0, z=0):
     psi = xp.exp(1j * theta)
     return psi, 0
     
-def set_init2D(x, y=0, z=0):
-    wfc = (8**0.25)*(0.25*xp.pi)**(-3/8) * xp.exp(2*(-x**2 - 2*y**2 - 4*z**2))
-    V = 1/2*(x**2 + 4*y**2 * 16*z**2)
-    return wfc, V
+def set_init(x, y=0):
+    wfc = (1/xp.pi)**0.5 * xp.exp(-(x**2 +y**2)/2)
+    pot = 0.5*(x**2 + y**2) 
+    return wfc, pot
+
 
 print(par)
-xp.random.seed(0)
+# xp.random.seed(0)
 G.set_init(set_init_tsubota)
 G.evolve()
-for i in range(1):
+
+
+# for i in range(1):
     
-    comp, incomp = G.KE_decomp()
-    print(G.compute_energy())
-    print(G.compute_kinetic_energy(), G.compute_quantum_energy(), G.compute_internal_energy())
-    print(comp, incomp)    
-    print('\n\n\n')
-    G.evolve_ms()
-print(type(G.wfc), G.wfc.shape)
+#     comp, incomp = G.KE_decomp()
+#     print(G.compute_energy())
+#     print(G.compute_kinetic_energy(), G.compute_quantum_energy(), G.compute_internal_energy())
+#     print(comp, incomp)    
+#     print('\n\n\n')
+#     G.evolve_ms()
+# print(type(G.wfc), G.wfc.shape)
+
+# f = hp.f = hp.File(par.path/'rms.hdf5', 'r')
+# xrms = xp.array(f['xrms'])
+# t = xp.array(f['t'])
+# f.close()
