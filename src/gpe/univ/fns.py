@@ -1,10 +1,10 @@
-from gpe.univ import my_fft
 from gpe.univ.params import Params
 from gpe.univ.grid import Grid
-from gpe.set_device import xp
+from gpe.univ import my_fft
+# from gpe.set_device import xp
 
 # Integral in real space
-def integralr(arr, grid: Grid):
+def integralr(params, arr, grid: Grid):
     """Integrates an array in real space (Trapezoid method).
 
     Parameters
@@ -16,10 +16,10 @@ def integralr(arr, grid: Grid):
     -------
     complex
     """
-    return  grid.dV * xp.sum(arr)
+    return  grid.dV * params.xp.sum(arr)
 
 # Integeral in fourier space
-def integralk(arrk, grid: Grid):
+def integralk(params, arrk, grid: Grid):
     """Integrates an array in real space (Trapezoid method).
 
     Parameters
@@ -31,10 +31,10 @@ def integralk(arrk, grid: Grid):
     -------
     complex
     """
-    return grid.volume * xp.sum(arrk)
+    return grid.volume * params.xp.sum(arrk)
 
 #Calculates the gradient of the wavefunction    
-def gradient(arr, G):
+def gradient(params, arr, G):
     """Calculates the gradient using spectral method along different axes depending on dimensionality.
         The result is stored in the Vx, Vy, Vz arrays inside U.
         U is an attrubite of the GPE object.
@@ -46,18 +46,18 @@ def gradient(arr, G):
     
     """
     if G.params.dim == 1:
-        G.U.temp[:] = my_fft.forward_transform(arr)
-        G.U.Vx[:] = my_fft.inverse_transform(1j * G.grid.kxx * G.U.temp) 
+        G.U.temp[:] = my_fft.forward_transform(params, arr)
+        G.U.Vx[:] = my_fft.inverse_transform(params, 1j * G.grid.kxx * G.U.temp) 
         
     elif G.params.dim == 2:
-        G.U.temp[:, :] = my_fft.forward_transform(arr)
-        G.U.Vx[:, :] = my_fft.inverse_transform(1j * G.grid.kxx * G.U.temp)
-        G.U.Vy[:, :] = my_fft.inverse_transform(1j * G.grid.kyy * G.U.temp)
+        G.U.temp[:, :] = my_fft.forward_transform(params, arr)
+        G.U.Vx[:, :] = my_fft.inverse_transform(params, 1j * G.grid.kxx * G.U.temp)
+        G.U.Vy[:, :] = my_fft.inverse_transform(params, 1j * G.grid.kyy * G.U.temp)
     
     elif G.params.dim == 3:
-        G.U.temp[:, :, :] = my_fft.forward_transform(arr)
-        G.U.Vx[:, :, :] = my_fft.inverse_transform(1j * G.grid.kxx * G.U.temp)
-        G.U.Vy[:, :, :] = my_fft.inverse_transform(1j * G.grid.kyy * G.U.temp)
-        G.U.Vz[:, :, :] = my_fft.inverse_transform(1j * G.grid.kzz * G.U.temp)
+        G.U.temp[:, :, :] = my_fft.forward_transform(params, arr)
+        G.U.Vx[:, :, :] = my_fft.inverse_transform(params, 1j * G.grid.kxx * G.U.temp)
+        G.U.Vy[:, :, :] = my_fft.inverse_transform(params, 1j * G.grid.kyy * G.U.temp)
+        G.U.Vz[:, :, :] = my_fft.inverse_transform(params, 1j * G.grid.kzz * G.U.temp)
     
     return True

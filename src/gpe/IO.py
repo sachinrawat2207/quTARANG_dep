@@ -1,6 +1,6 @@
 import h5py as hp
 import os
-from gpe.set_device import xp
+# from gpe.set_device import xp
 
 # directory generation
 def gen_path(file_loc):
@@ -18,8 +18,8 @@ def gen_path(file_loc):
 #     file_name = Path(G.params.in_path)/G.params.filename
 #     f = hp.File(file_name, 'r')
 #     if G.params.gpu == True:
-#         G.wfc = xp.asarray(f['wfc']) 
-#         G.V = xp.asarray(f['V'])
+#         G.wfc = G.params.xp.asarray(f['wfc']) 
+#         G.V = G.params.xp.asarray(f['V'])
     
 #     else:
 #         G.wfc = f['wfc']
@@ -31,7 +31,7 @@ def save_wfc(G, t):
     filename = path/('wfc/' + 'wfc_t%f.hdf5' %t)
     f = hp.f = hp.File(filename, 'w')
     if G.params.gpu == True:
-        f.create_dataset('wfc', data = xp.asnumpy(G.wfc))
+        f.create_dataset('wfc', data = G.params.xp.asnumpy(G.wfc))
     else:
         f.create_dataset('wfc', data = G.wfc)  
     f.create_dataset('t', data = t) 
@@ -42,13 +42,13 @@ def compute_energy(G, t):
     norm = G.compute_norm()**2
     # comp_KE, incomp_KE = G.KE_decomp()
     if G.params.gpu == True:
-        # G.comp_KE.append(xp.asnumpy(comp_KE/norm))
-        # G.incomp_KE.append(xp.asnumpy(incomp_KE/norm))
-        # G.internal_energy.append(xp.asnumpy(G.compute_internal_energy()/norm))
-        # G.quantum_energy.append(xp.asnumpy(G.compute_quantum_energy()/norm))
-        G.total_energy.append(xp.asnumpy(G.compute_energy()/norm))
-        # G.total_KE.append(xp.asnumpy(G.compute_kinetic_energy()/norm))
-        # G.potential_energy.append(xp.asnumpy(G.compute_potential_energy()/norm))
+        # G.comp_KE.append(G.params.xp.asnumpy(comp_KE/norm))
+        # G.incomp_KE.append(G.params.xp.asnumpy(incomp_KE/norm))
+        # G.internal_energy.append(G.params.xp.asnumpy(G.compute_internal_energy()/norm))
+        # G.quantum_energy.append(G.params.xp.asnumpy(G.compute_quantum_energy()/norm))
+        G.total_energy.append(G.params.xp.asnumpy(G.compute_energy()/norm))
+        # G.total_KE.append(G.params.xp.asnumpy(G.compute_kinetic_energy()/norm))
+        # G.potential_energy.append(G.params.xp.asnumpy(G.compute_potential_energy()/norm))
         G.t_energy.append(t)
     
     else:
@@ -65,10 +65,10 @@ def compute_energy(G, t):
 def compute_ektk(G, t):
     KEcomp_spec, KEincomp_spec = G.comp_KEcomp_spectrum()
     if G.params.gpu == True:
-        G.KEcomp_spec.append(xp.asnumpy(KEcomp_spec))
-        G.KEincomp_spec.append(xp.asnumpy(KEincomp_spec))
-        # G.tk_par_no.append(xp.asnumpy(G.comp_tk_particle_no()))
-        G.t_ektk.append(xp.asnumpy(t))
+        G.KEcomp_spec.append(G.params.xp.asnumpy(KEcomp_spec))
+        G.KEincomp_spec.append(G.params.xp.asnumpy(KEincomp_spec))
+        # G.tk_par_no.append(G.params.xp.asnumpy(G.comp_tk_particle_no()))
+        G.t_ektk.append(G.params.xp.asnumpy(t))
     else:
         G.KEcomp_spec.append(KEcomp_spec)
         G.KEincomp_spec.append(KEincomp_spec)
@@ -77,11 +77,11 @@ def compute_ektk(G, t):
 
 def compute_rms(G, t):
     if G.params.gpu == True:
-        G.xrms.append(xp.asnumpy(G.compute_xrms()))
-        G.yrms.append(xp.asnumpy(G.compute_yrms()))
+        G.xrms.append(G.params.xp.asnumpy(G.compute_xrms()))
+        G.yrms.append(G.params.xp.asnumpy(G.compute_yrms()))
         if G.params.dim == 3:
-            G.zrms.append(xp.asnumpy(G.compute_zrms()))
-        G.t_rms.append(xp.asnumpy(t))
+            G.zrms.append(G.params.xp.asnumpy(G.compute_zrms()))
+        G.t_rms.append(G.params.xp.asnumpy(t))
     
     else:
         G.xrms.append(G.compute_xrms())

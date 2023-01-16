@@ -1,4 +1,4 @@
-from gpe.set_device import set_gpu
+# from gpe.set_device import set_gpu
 from pathlib import Path
 
 class Params:
@@ -60,7 +60,18 @@ class Params:
         self.save_wfc, self.save_wfc_start_step, self.save_wfc_iter_step = wfc
         
         if self.gpu == True:
-            set_gpu(gpu_rank)
+            import cupy as cp
+            import cupy.fft as fft
+            dev = cp.cuda.Device(self.gpu_rank)
+            dev.use()
+            self.xp = cp
+            self.fft = fft
+        else:
+            import numpy as np
+            from pyfftw.interfaces import numpy_fft
+            self.xp = np
+            self.fft = numpy_fft
+        
         ## Set the dimension
         if self.Nz == 1:
             if self.Ny == 1:

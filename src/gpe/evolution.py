@@ -1,5 +1,5 @@
+# from gpe.set_device import xp
 from gpe.univ import my_fft
-from gpe.set_device import xp
 import gpe.IO as IO
 from tqdm import tqdm
 
@@ -18,7 +18,7 @@ def tssp_stepr(G, dt: float):
     ndarray
         wavefunction after evolution
     """
-    return G.wfc * xp.exp(-1j * (G.pot + G.params.g  * (G.wfc * G.wfc.conj())) * dt)
+    return G.wfc * G.params.xp.exp(-1j * (G.pot + G.params.g  * (G.wfc * G.wfc.conj())) * dt)
 
 def tssp_stepk(G, dt: float):
     """ Step of the TSSP Scheme to be taken in k space
@@ -34,22 +34,22 @@ def tssp_stepk(G, dt: float):
     ndarray
         wavefunction after evolution
     """
-    return G.wfck * xp.exp(-0.5j * G.grid.ksqr * dt)
+    return G.wfck * G.params.xp.exp(-0.5j * G.grid.ksqr * dt)
 
 # For real time evolution
 def time_adv_strang(G):
     G.wfc = tssp_stepr(G, G.params.dt/2)
-    G.wfck = my_fft.forward_transform(G.wfc)
+    G.wfck = my_fft.forward_transform(G.params, G.wfc)
+    G.wfc = my_fft.inverse_transform(G.params, G.wfck)
     G.wfck = tssp_stepk(G, G.params.dt)
-    G.wfc = my_fft.inverse_transform(G.wfck)
     G.wfc = tssp_stepr(G, G.params.dt/2)
 
 # For imaginary time evolution
 def time_adv_istrang(G):
     G.wfc = tssp_stepr(G, -1j * G.params.dt/2)
-    G.wfck = my_fft.forward_transform(G.wfc)
+    G.wfck = my_fft.forward_transform(G.params, G.wfc)
     G.wfck = tssp_stepk(G, -1j * G.params.dt)
-    G.wfc = my_fft.inverse_transform(G.wfck)
+    G.wfc = my_fft.inverse_transform(G.params, G.wfck)
     G.wfc = tssp_stepr(G, -1j * G.params.dt/2)
     G.renormalize(G.Npar)
     # G.wfc = G.wfc/(G.params.volume * xp.sum(xp.abs(my_fft.forward_transform(G.wfc))**2))**.5
@@ -57,8 +57,8 @@ def time_adv_istrang(G):
 
 #-----------------------------------------RK4 scheme-----------------------------------------
 def compute_RHS(G, psik):
-    psi = my_fft.inverse_transform(psik)
-    psi = -1j  * (my_fft.ksqr * psik/2 + my_fft.forward_transform((G.params.g * xp.abs(psi)**2 + G.V) * psi))
+    psi = my_fft.inverse_transform(G.params, psik)
+    psi = -1j  * (my_fft.ksqr * psik/2 + my_fft.forward_transform(G.params, (G.params.g * G.params.xp.abs(psi)**2 + G.V) * psi))
     return psi
 
 #-----------------------------------------Time Advance-----------------------------------------
