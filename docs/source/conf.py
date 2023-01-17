@@ -20,7 +20,7 @@ release = '0.0.1'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
-MOCK_MODULES = ['numpy', 'cupy', 'h5py', 'matplotlib']
+MOCK_MODULES = ['numpy', 'cupy', 'h5py', 'matplotlib', 'pyfftw', 'tqdm']
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = mock.Mock()
 
