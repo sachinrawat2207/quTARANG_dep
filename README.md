@@ -32,7 +32,8 @@ To run a simulation:
 1. Import the required libraries
 
     ```python
-        from quTARANG import xp, Params, GPE
+        import numpy as xp #To run on gpu, import cumpy as xp
+        import quTARANG as qt
     ```
 
 
@@ -43,7 +44,7 @@ To run a simulation:
 
     ```python
     # Create an instance of the Params class for storing parameters.
-        par = gpe.Params(N = [64, 64, 64],
+        par = qt.Params(N = [64, 64, 64],
                      L = [16, 16, 16],
                      g = 0.1,
                      dt = 0.001,
@@ -56,7 +57,7 @@ To run a simulation:
 
     ```python
     # Create an instance of the GPE class.
-       G = gpe.GPE(par)
+       G = qt.GPE(par)
     ```
 
 4. Set initial conditon
@@ -66,10 +67,10 @@ To run a simulation:
     ```python
 
         # Set wavefunction
-        wfc = (1/xp.pi**(1/4)) * xp.exp(-(x**2/2 + y**2/2 + z**2/2))
+        wfc = lambda x, y=0, z=0: (1/xp.pi**(1/4)) * xp.exp(-(x**2/2 + y**2/2 + z**2/2))
         
         # Set potential 
-        pot = (x**2 + y**2 + z**2)/2
+        pot = lambda x, y=0, z=0: (x**2 + y**2 + z**2)/2
 
         G.set_init(wfc, pot)
     ```
