@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Configuration file for the Sphinx documentation builder.
 #
 # For the full list of built-in configuration values, see the documentation:
@@ -46,7 +45,7 @@ html_static_path = ['_static']
 
 # def setup(app):
 #     app.add_css_file('css/custom.css')
-=======
+#
 # Configuration file for the Sphinx documentation builder.
 #
 # For the full list of built-in configuration values, see the documentation:
@@ -94,4 +93,3 @@ html_static_path = ['_static']
 
 # def setup(app):
 #     app.add_css_file('css/custom.css')
->>>>>>> 6658b2384e1e84bbfb628b8c6c97d8251df622b3
