@@ -9,7 +9,7 @@ One can run quTARANG in a single cpu as well as single gpu.
 
 You need the following libraries to run quTARANG:
 
-pathlib, h5py, shutils, numpy. 
+pathlib, h5py, numpy (to run code on GPU), cupy (to run code on GPU). 
 
 You can install the above package by using the following commands:
 
@@ -35,7 +35,11 @@ To run a simulation:
 
     .. code-block:: python
         
-        from quTARANG import xp, Params, GPE
+        from quTARANG import Params, GPE
+        import cupy as xp 
+        # import numpy as xp
+        
+Import `numpy` to run code to define arrays while using CPU and `cupy` to define arrays while  using CPU.  
 
 
 #. Set the parameters
@@ -52,6 +56,8 @@ To run a simulation:
                      dt = 0.001,
                      tmax = 5,
                      rms = [True, 0, 100])
+                     
+   
 
 #. Initiate ``GPE`` class
     Create an instance of the GPE class by passing the Params instance created previously.
