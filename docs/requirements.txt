@@ -2,4 +2,3 @@ sphinx_rtd_theme
 sphinxcontrib-bibtex
 sphinx_design
 sphinx_copybutton
-numpy
