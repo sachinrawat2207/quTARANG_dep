@@ -32,7 +32,7 @@ To run a simulation:
 1. Import the required libraries
 
     ```python
-        import numpy as xp #To run on gpu, import cumpy as xp
+        import numpy as xp #To run on gpu, import cupy as xp
         import quTARANG as qt
     ```
 
