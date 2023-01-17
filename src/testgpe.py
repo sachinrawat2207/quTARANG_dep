@@ -1,7 +1,7 @@
-from gpe.univ.grid import Grid
-from gpe.univ.params import Params
-from gpe.univ import my_fft
-from gpe import gpe
+from quTARANG.univ.grid import Grid
+from quTARANG.univ.params import Params
+from quTARANG.univ import my_fft
+from quTARANG import gpe
 import h5py as hp
 # import numpy as xp
 import cupy as xp
