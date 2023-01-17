@@ -152,7 +152,7 @@ class GPE():
         float
             Normalisation constant
         """
-        return fns.integralr(self.params.xp.abs(self.wfc)**2, self.grid)**0.5
+        return fns.integralr(self.params, self.params.xp.abs(self.wfc)**2, self.grid)**0.5
     
     def renormalize(self, normFact: float = 1.0):   #C
         """Renormalisation of the wavefunction.
@@ -173,7 +173,7 @@ class GPE():
     def compute_chempot(self):   
         self.U.temp[:] = my_fft.forward_transform(self.params, self.wfc) #for sstep_strang
         deriv = self.params.volume * self.params.xp.sum(self.grid.ksqr * self.params.xp.abs(self.U.temp)**2)  
-        return fns.integralr(((self.pot + self.params.g * self.params.xp.abs(self.wfc)**2) * self.params.xp.abs(self.wfc)**2), self.grid) + deriv/2
+        return fns.integralr(self.params, ((self.pot + self.params.g * self.params.xp.abs(self.wfc)**2) * self.params.xp.abs(self.wfc)**2), self.grid) + deriv/2
     
     def compute_xrms(self):  #C
         return (fns.integralr(self.params, self.params.xp.abs(self.wfc)**2 * self.grid.xx**2, self.grid) - (fns.integralr(self.params, self.params.xp.abs(self.wfc)**2 * self.grid.xx, self.grid))**2)**.5
@@ -186,13 +186,13 @@ class GPE():
     
     def compute_rrms(self):    #C
         if self.params.dim == 2:
-            return (fns.integralr(self.params.xp.abs(self.wfc) ** 2 * (self.grid.xx**2 + self.grid.yy**2), self.grid))**.5
-        return (fns.integralr(self.params.xp.abs(self.wfc) ** 2 * (self.grid.xx**2 + self.grid.yy**2 + self.grid.zz**2), self.grid))**.5
+            return (fns.integralr(self.params, self.params.xp.abs(self.wfc) ** 2 * (self.grid.xx**2 + self.grid.yy**2), self.grid))**.5
+        return (fns.integralr(self.params, self.params.xp.abs(self.wfc) ** 2 * (self.grid.xx**2 + self.grid.yy**2 + self.grid.zz**2), self.grid))**.5
     
     def compute_energy(self):     #C
         self.U.temp[:] = my_fft.forward_transform(self.params, self.wfc) #for sstep_strang
         deriv = self.params.volume * self.params.xp.sum(self.grid.ksqr * self.params.xp.abs(self.U.temp)**2)  
-        return fns.integralr(((self.pot + 0.5 * self.params.g * self.params.xp.abs(self.wfc)**2) * self.params.xp.abs(self.wfc)**2), self.grid) + deriv/2
+        return fns.integralr(self.params, ((self.pot + 0.5 * self.params.g * self.params.xp.abs(self.wfc)**2) * self.params.xp.abs(self.wfc)**2), self.grid) + deriv/2
     
     def compute_quantum_energy(self):   #C
         fns.gradient(self.params.xp.abs(self.wfc), self)
@@ -201,15 +201,15 @@ class GPE():
 
         elif self.params.dim == 3:
             self.U.temp[:] = 0.5 * (self.U.Vx**2 + self.U.Vy**2 + self.U.Vz**2)
-        return fns.integralr(self.U.temp.real, self.grid)
+        return fns.integralr(self.params, self.U.temp.real, self.grid)
 
 
     def compute_internal_energy(self):   
-        return 0.5 * self.params.g * fns.integralr(self.params.xp.abs(self.wfc)**4, self.grid)
+        return 0.5 * self.params.g * fns.integralr(self.params, self.params.xp.abs(self.wfc)**4, self.grid)
         
 
     def compute_potential_energy(self): 
-        return fns.integralr(self.pot * self.params.xp.abs(self.wfc)**2, self.grid) 
+        return fns.integralr(self.params, self.pot * self.params.xp.abs(self.wfc)**2, self.grid) 
         
     def compute_velocity(self):   
         fns.gradient(self.wfc.conj(), self)
@@ -227,7 +227,7 @@ class GPE():
     def compute_kinetic_energy(self):  # doubt while integrating in fourier space
         self.compute_velocity()
         self.U.temp[:] = 0.5 * self.params.xp.abs(self.wfc)**2 * (self.U.Vx**2 + self.U.Vy**2 + self.U.Vz**2)
-        return fns.integralr(self.U.temp.real, self.grid)
+        return fns.integralr(self.params, self.U.temp.real, self.grid)
 
     def omegak(self):   
         self.compute_velocity() 
@@ -273,11 +273,11 @@ class GPE():
         """
         self.omegak()
         if self.params.dim == 2:
-            KE_comp = 0.5 * fns.integralk(self.params.xp.abs(self.U.Vx)**2 + self.params.xp.abs(self.U.Vy)**2, self.params)
-            KE_incomp = 0.5 * fns.integralk(self.params.xp.abs(self.U.omegai_kx)**2 + self.params.xp.abs(self.U.omegai_ky)**2, self.params)
+            KE_comp = 0.5 * fns.integralk(self.params, self.params.xp.abs(self.U.Vx)**2 + self.params.xp.abs(self.U.Vy)**2, self.params)
+            KE_incomp = 0.5 * fns.integralk(self.params, self.params.xp.abs(self.U.omegai_kx)**2 + self.params.xp.abs(self.U.omegai_ky)**2, self.params)
         else:
-            KE_comp = 0.5 * fns.integralk(self.params.xp.abs(self.U.Vx)**2 + self.params.xp.abs(self.U.Vy)**2 + self.params.xp.abs(self.U.Vz)**2, self.params)
-            KE_incomp = 0.5 * fns.integralk(self.params.xp.abs(self.U.omegai_kx)**2 + self.params.xp.abs(self.U.omegai_ky)**2 + self.params.xp.abs(self.U.omegai_kz)**2, self.params)
+            KE_comp = 0.5 * fns.integralk(self.params, self.params.xp.abs(self.U.Vx)**2 + self.params.xp.abs(self.U.Vy)**2 + self.params.xp.abs(self.U.Vz)**2, self.params)
+            KE_incomp = 0.5 * fns.integralk(self.params, self.params.xp.abs(self.U.omegai_kx)**2 + self.params.xp.abs(self.U.omegai_ky)**2 + self.params.xp.abs(self.U.omegai_kz)**2, self.params)
         return KE_comp, KE_incomp 
         
     

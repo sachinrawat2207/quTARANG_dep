@@ -40,8 +40,8 @@ def tssp_stepk(G, dt: float):
 def time_adv_strang(G):
     G.wfc = tssp_stepr(G, G.params.dt/2)
     G.wfck = my_fft.forward_transform(G.params, G.wfc)
-    G.wfc = my_fft.inverse_transform(G.params, G.wfck)
     G.wfck = tssp_stepk(G, G.params.dt)
+    G.wfc = my_fft.inverse_transform(G.params, G.wfck)
     G.wfc = tssp_stepr(G, G.params.dt/2)
 
 # For imaginary time evolution
