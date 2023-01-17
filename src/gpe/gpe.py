@@ -195,7 +195,7 @@ class GPE():
         return fns.integralr(self.params, ((self.pot + 0.5 * self.params.g * self.params.xp.abs(self.wfc)**2) * self.params.xp.abs(self.wfc)**2), self.grid) + deriv/2
     
     def compute_quantum_energy(self):   #C
-        fns.gradient(self.params.xp.abs(self.wfc), self)
+        fns.gradient(self.params, self.params.xp.abs(self.wfc), self)
         if self.params.dim == 2:
             self.U.temp[:] = 0.5 * (self.U.Vx**2 + self.U.Vy**2) 
 
@@ -212,7 +212,7 @@ class GPE():
         return fns.integralr(self.params, self.pot * self.params.xp.abs(self.wfc)**2, self.grid) 
         
     def compute_velocity(self):   
-        fns.gradient(self.wfc.conj(), self)
+        fns.gradient(self.params, self.wfc.conj(), self)
         if self.params.dim == 2:
             self.U.Vx[:] = -(self.wfc * self.U.Vx).imag/self.params.xp.abs(self.wfc)**2 
             self.U.Vy[:] = -(self.wfc * self.U.Vy).imag/self.params.xp.abs(self.wfc)**2 

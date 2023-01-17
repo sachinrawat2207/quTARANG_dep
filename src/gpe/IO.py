@@ -5,7 +5,7 @@ import os
 # directory generation
 def gen_path(file_loc):
     global path
-    path = file_loc/'output'
+    path = file_loc
     if not path.exists():
         os.makedirs(path)
 

@@ -1,6 +1,6 @@
 from gpe.univ.grid import Grid
 from gpe.univ.params import Params
-from gpe.set_device import xp
+# from gpe.set_device import xp
 from gpe.univ import my_fft
 from gpe import gpe
 import h5py as hp
