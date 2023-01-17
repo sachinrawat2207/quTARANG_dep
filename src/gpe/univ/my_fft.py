@@ -1,5 +1,6 @@
 from gpe.univ.params import Params
 # from gpe.set_device import xp, fft
+import numpy as np 
 
 def forward_transform(params, arr):
     """Forward Fourier Transform
@@ -12,7 +13,7 @@ def forward_transform(params, arr):
     -------
     Forward Fourier transform of the input array
     """
-    return params.xp.fft.fftn(arr)/params.xp.product(arr.shape)
+    return params.xp.fft.fftn(arr)/np.product(arr.shape)
 
 def inverse_transform(params, arr):
     """Inverse Fourier Transform
@@ -25,4 +26,4 @@ def inverse_transform(params, arr):
     -------
     Inverse Fourier tranform of the input array
     """
-    return params.xp.fft.ifftn(arr) * params.xp.product(arr.shape)
+    return params.xp.fft.ifftn(arr) * np.product(arr.shape)

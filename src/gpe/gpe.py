@@ -176,13 +176,13 @@ class GPE():
         return fns.integralr(((self.pot + self.params.g * self.params.xp.abs(self.wfc)**2) * self.params.xp.abs(self.wfc)**2), self.grid) + deriv/2
     
     def compute_xrms(self):  #C
-        return (fns.integralr(self.params.xp.abs(self.wfc)**2 * self.grid.xx**2, self.grid) - (fns.integralr(self.params.xp.abs(self.wfc)**2 * self.grid.xx, self.grid))**2)**.5
+        return (fns.integralr(self.params, self.params.xp.abs(self.wfc)**2 * self.grid.xx**2, self.grid) - (fns.integralr(self.params, self.params.xp.abs(self.wfc)**2 * self.grid.xx, self.grid))**2)**.5
         
     def compute_yrms(self):  #C
-        return (fns.integralr(self.params.xp.abs(self.wfc)**2 * self.grid.yy**2, self.grid) - (fns.integralr(self.params.xp.abs(self.wfc)**2 * self.grid.yy, self.grid))**2)**.5   
+        return (fns.integralr(self.params, self.params.xp.abs(self.wfc)**2 * self.grid.yy**2, self.grid) - (fns.integralr(self.params, self.params.xp.abs(self.wfc)**2 * self.grid.yy, self.grid))**2)**.5   
 
     def compute_zrms(self):  #C
-        return (fns.integralr(self.params.xp.abs(self.wfc)**2 * self.grid.zz**2, self.grid) - (fns.integralr(self.params.xp.abs(self.wfc)**2 * self.grid.zz, self.grid))**2)**.5
+        return (fns.integralr(self.params, self.params.xp.abs(self.wfc)**2 * self.grid.zz**2, self.grid) - (fns.integralr(self.params, self.params.xp.abs(self.wfc)**2 * self.grid.zz, self.grid))**2)**.5
     
     def compute_rrms(self):    #C
         if self.params.dim == 2:
