@@ -6,17 +6,18 @@ build-backend = "hatchling.build"
 name = "quTARANG"
 version = "0.0.1"
 authors = [
-  { name="Example Author", email="author@example.com" },
+  { name="Shawan Kumar Jha", email="shawankumar@iitg.ac.in" },
+  { name="Sachin Singh Rawat", email="sachinr@iitk.ac.in"}
 ]
-description = "A small example package"
+description = "GPE solver"
 readme = "README.md"
 requires-python = ">=3.7"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: BSD-3 License",
     "Operating System :: OS Independent",
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/pypa/sampleproject"
-"Bug Tracker" = "https://github.com/pypa/sampleproject/issues"
+"Homepage" = "https://github.com/sachinrawat2207/quTARANG"
+"Bug Tracker" = "https://github.com/sachinrawat2207/quTARANG/issues"
