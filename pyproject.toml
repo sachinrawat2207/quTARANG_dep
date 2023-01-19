@@ -11,11 +11,11 @@ authors = [
 ]
 description = "GPE solver"
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.6"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: BSD-3 License",
     "Operating System :: OS Independent",
+    "Development Status :: 5 - Production/Stable",
 ]
 
 [project.urls]
