@@ -1,6 +1,7 @@
 # from gpe.set_device import xp
 from quTARANG.univ import my_fft
 import quTARANG.IO as IO
+from quTARANG.univ import fns
 from tqdm import tqdm
 
 #-----------------------------------------TSSP scheme-----------------------------------------
@@ -55,11 +56,41 @@ def time_adv_istrang(G):
     # G.wfc = G.wfc/(G.params.volume * xp.sum(xp.abs(my_fft.forward_transform(G.wfc))**2))**.5
 
 
-#-----------------------------------------RK4 scheme-----------------------------------------
-def compute_RHS(G, psik):
+#-----------------------------------------Compute RHS function-----------------------------------------
+def compute_rhs(G, psik):
     psi = my_fft.inverse_transform(G.params, psik)
     psi = -1j  * (my_fft.ksqr * psik/2 + my_fft.forward_transform(G.params, (G.params.g * G.params.xp.abs(psi)**2 + G.V) * psi))
     return psi
+
+#-----------------------------------------RK4 scheme-----------------------------------------
+
+def  time_adv_rk4(G):
+    """ RK4 scheme for evolution
+    
+    Parameters
+    ----------
+    G : GPE class
+    """
+    k1 = compute_rhs(G, G.wfck)
+    k2 = compute_rhs(G, G.wfck + G.params.dt/2 * k1)
+    k3 = compute_rhs(G, G.wfck + G.params.dt/2 * k2)
+    k4 = compute_rhs(G, G.wfck + G.params.dt * k3)
+    G.wfck = G.wfck + G.params.dt/6 * (k1 + 2 * k2 + 2 * k3 + k4)
+    
+
+def time_adv_irk4(G):
+    """ RK4 scheme for imaginary time evolution
+    
+    Parameters
+    ----------
+    G : GPE class
+    """
+    k1 = compute_rhs(G, G.wfck)
+    k2 = compute_rhs(G, G.wfck + 1j * G.params.dt/2 * k1)
+    k3 = compute_rhs(G, G.wfck + 1j * G.params.dt/2 * k2)
+    k4 = compute_rhs(G, G.wfck + 1j * G.params.dt * k3)
+    G.wfck = G.wfck + 1j * G.params.dt/6 * (k1 + 2*k2 + 2*k3 + k4)
+    G.wfck = G.wfck / (fns.integralk(G.params, G.params.xp.abs(G.wfck)**2))**0.5
 
 #-----------------------------------------Time Advance-----------------------------------------
 
@@ -70,6 +101,13 @@ def set_scheme(G):
             time_adv = time_adv_strang
         elif G.params.imgtime == True:
             time_adv = time_adv_istrang
+    
+    elif G.params.scheme == 'RK4':        
+        if G.params.imgtime == False:
+            time_adv = time_adv_rk4
+        elif G.params.imgtime == True:
+            time_adv = time_adv_irk4
+    
     else:
         print("Please choose the correct scheme")
         quit()
@@ -84,8 +122,11 @@ def time_advance(G):
     if (G.params.save_wfc or G.params.save_energy or G.params.save_ektk or G.params.save_rms):
         IO.gen_path(G.params.path) 
     
+    # For schemes ther then TSSP, where we need not to come in real space
+    if G.params.scheme != 'TSSP':
+        G.wfck = my_fft.forward_transform(G.wfc) 
+        
     for i in tqdm(range(G.params.nstep)):
-
         if(G.params.save_wfc == True and i >= G.params.save_wfc_start_step and (i - G.params.save_wfc_start_step)%G.params.save_wfc_iter_step == 0):
             IO.save_wfc(G, t)
             
@@ -100,7 +141,11 @@ def time_advance(G):
         
         t += G.params.dt
         time_adv(G)
-
+        
+        if G.params.scheme != 'TSSP':
+            G.wfc = my_fft.inverse_transform(G.wfck)
+    
+    
     if (G.params.save_energy): 
         IO.compute_energy(G, t)
         IO.save_energy(G)
