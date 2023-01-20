@@ -1,5 +1,5 @@
 ---
-title: 'quTARANG: A python GPU solver to study turbulence in quantum system.'
+title: 'quTARANG: A python GPE solver to study turbulence in quantum system'
 tags:
   - Python
   - Quantum turbulence
