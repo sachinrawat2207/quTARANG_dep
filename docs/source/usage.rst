@@ -5,11 +5,11 @@ Running quTARANG
 
 Packages Required
 -----------------
-One can run quTARANG in a single cpu as well as single gpu.
+One can run quTARANG on a single CPU as well as a single GPU.
 
 You need the following libraries to run quTARANG:
 
-pathlib, h5py, numpy (to run code on GPU), cupy (to run code on GPU). 
+pathlib, h5py, numpy (to run code on CPU), cupy (to run code on GPU). 
 
 You can install the above package by using the following commands:
 
@@ -19,12 +19,8 @@ You can install the above package by using the following commands:
     pip install h5py
     pip install numpy
 
-If need to require cupy library for gpu run.
-In order to install cupy you must have installed a compatible version of CUDA for your GPU. and then install the ``cupy`` library for your cuda version by 
-using the compatible version by using the following link:
-
+``cupy`` library is required for GPU run. In order to install ``cupy`` you must first install a compatible version of ``CUDA`` for your GPU. Then install the ``cupy`` library for your cuda version. For more details:
 https://docs.cupy.dev/en/stable/install.html
-
 
 Running the code
 ----------------
@@ -36,10 +32,8 @@ To run a simulation:
     .. code-block:: python
         
         from quTARANG import Params, GPE
-        import cupy as xp 
-        # import numpy as xp
-        
-Import `numpy` to run code to define arrays while using CPU and `cupy` to define arrays while  using CPU.  
+        import numpy as xp 
+        # import cupy as xp # For GPU run
 
 
 #. Set the parameters
@@ -58,9 +52,9 @@ Import `numpy` to run code to define arrays while using CPU and `cupy` to define
                      rms = [True, 0, 100])
                      
    
-
 #. Initiate ``GPE`` class
-    Create an instance of the GPE class by passing the Params instance created previously.
+    
+    Create an instance of the ``GPE`` class by passing the ``Params`` instance created previously.
 
     .. code-block:: python
 
@@ -74,10 +68,10 @@ Import `numpy` to run code to define arrays while using CPU and `cupy` to define
     .. code-block:: python
 
         # Set wavefunction
-        wfc = (1/xp.pi**(1/4)) * xp.exp(-(x**2/2 + y**2/2 + z**2/2))  
+        wfc = lambda x, y=0, z=0: (1/xp.pi**(1/4)) * xp.exp(-(x**2/2 + y**2/2 + z**2/2))  
 
         # Set potential 
-        pot = (x**2 + y**2 + z**2)/2
+        pot = lambda x, y=0, z=0: (x**2 + y**2 + z**2)/2
 
         G.set_init(wfc, pot)
 
