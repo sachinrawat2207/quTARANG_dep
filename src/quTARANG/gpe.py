@@ -8,7 +8,6 @@ from quTARANG import evolution
 class Vector_field():
     """ It contains the variables which helps to calculate the different physical quantities of GPE class 
     """
-    Vx = []
     Vx = []  
     Vy = []
     Vz = []
@@ -25,13 +24,18 @@ class Vector_field():
         self.set_arrays(params)
         
     def set_arrays(self, params: Params):
+        
+        if params.dim == 1:
+            self.Vx = params.xp.zeros((params.Nx), dtype = params.complex_dtype)
+            self.omegai_kx = params.xp.zeros((params.Nx), dtype = params.complex_dtype)
+            self.temp = params.xp.zeros((params.Nx), dtype = params.complex_dtype)
+            self.temp1 = params.xp.zeros((params.Nx), dtype = params.complex_dtype)
+            
         if params.dim == 2:
             self.Vx = params.xp.zeros((params.Nx, params.Ny), dtype = params.complex_dtype)
             self.Vy = params.xp.zeros((params.Nx, params.Ny), dtype = params.complex_dtype)
-            self.Vz = params.xp.zeros((params.Nx, params.Ny), dtype = params.complex_dtype)
             self.omegai_kx = params.xp.zeros((params.Nx, params.Ny), dtype = params.complex_dtype)
             self.omegai_ky = params.xp.zeros((params.Nx, params.Ny), dtype = params.complex_dtype)
-            self.omegai_kz = params.xp.zeros((params.Nx, params.Ny), dtype = params.complex_dtype)
             self.temp = params.xp.zeros((params.Nx, params.Ny), dtype = params.complex_dtype)
             self.temp1 = params.xp.zeros((params.Nx, params.Ny), dtype = params.complex_dtype)
         
@@ -196,7 +200,11 @@ class GPE():
     
     def compute_quantum_energy(self):   #C
         fns.gradient(self.params, self.params.xp.abs(self.wfc), self)
-        if self.params.dim == 2:
+        
+        if self.params.dim == 1:
+            self.U.temp[:] = 0.5 * (self.U.Vx**2) 
+            
+        elif self.params.dim == 2:
             self.U.temp[:] = 0.5 * (self.U.Vx**2 + self.U.Vy**2) 
 
         elif self.params.dim == 3:
@@ -213,7 +221,11 @@ class GPE():
         
     def compute_velocity(self):   
         fns.gradient(self.params, self.wfc.conj(), self)
-        if self.params.dim == 2:
+        
+        if self.params.dim == 1:
+            self.U.Vx[:] = -(self.wfc * self.U.Vx).imag/self.params.xp.abs(self.wfc)**2 
+            
+        elif self.params.dim == 2:
             self.U.Vx[:] = -(self.wfc * self.U.Vx).imag/self.params.xp.abs(self.wfc)**2 
             self.U.Vy[:] = -(self.wfc * self.U.Vy).imag/self.params.xp.abs(self.wfc)**2 
     
@@ -226,16 +238,37 @@ class GPE():
 
     def compute_kinetic_energy(self):  # doubt while integrating in fourier space
         self.compute_velocity()
-        self.U.temp[:] = 0.5 * self.params.xp.abs(self.wfc)**2 * (self.U.Vx**2 + self.U.Vy**2 + self.U.Vz**2)
+        if self.params.dim == 1:
+            self.U.temp[:] = 0.5 * self.params.xp.abs(self.wfc)**2 * (self.U.Vx**2)
+
+        
+        elif self.params.dim == 2:
+            self.U.temp[:] = 0.5 * self.params.xp.abs(self.wfc)**2 * (self.U.Vx**2 + self.U.Vy**2)
+
+        
+        elif self.params.dim == 3:
+            self.U.temp[:] = 0.5 * self.params.xp.abs(self.wfc)**2 * (self.U.Vx**2 + self.U.Vy**2 + self.U.Vz**2)
         return fns.integralr(self.params, self.U.temp.real, self.grid)
 
     def omegak(self):   
         self.compute_velocity() 
         self.U.temp[:] = self.params.xp.abs(self.wfc)
-        self.U.omegai_kx[:] = my_fft.forward_transform(self.params, self.U.temp * self.U.Vx)
-        self.U.omegai_ky[:] = my_fft.forward_transform(self.params, self.U.temp * self.U.Vy)
         
+        if self.params.dim == 1:
+            self.U.omegai_kx[:] = my_fft.forward_transform(self.params, self.U.temp * self.U.Vx)
+            self.grid.ksqr[0] = 1
+            self.U.temp[:] = (self.grid.kxx * self.U.omegai_kx)/self.grid.ksqr
+            
+            # Compressible part calculation
+            self.U.Vx[:] = self.grid.kxx * self.U.temp
+            self.grid.ksqr[0] = 0   
+            
+            #incompressible part calculation
+            self.U.omegai_kx[:] = self.U.omegai_kx - self.U.Vx
+            
         if self.params.dim == 2:
+            self.U.omegai_kx[:] = my_fft.forward_transform(self.params, self.U.temp * self.U.Vx)
+            self.U.omegai_ky[:] = my_fft.forward_transform(self.params, self.U.temp * self.U.Vy)
             self.grid.ksqr[0, 0] = 1
             self.U.temp[:] = (self.grid.kxx * self.U.omegai_kx + self.grid.kyy * self.U.omegai_ky)/self.grid.ksqr
             # Compressible part calculation
@@ -248,7 +281,10 @@ class GPE():
             self.U.omegai_ky[:] = self.U.omegai_ky - self.U.Vy
         
         elif self.params.dim == 3:
+            self.U.omegai_kx[:] = my_fft.forward_transform(self.params, self.U.temp * self.U.Vx)
+            self.U.omegai_ky[:] = my_fft.forward_transform(self.params, self.U.temp * self.U.Vy)
             self.U.omegai_kz[:] = my_fft.forward_transform(self.params, self.U.temp * self.U.Vz)
+            
             self.grid.ksqr[0, 0, 0] = 1 
             self.U.temp[:] = (self.grid.kxx * self.U.omegai_kx + self.grid.kyy * self.U.omegai_ky + self.grid.kzz * self.U.omegai_kz)/self.grid.ksqr
             # Compressible part calculation
@@ -256,6 +292,8 @@ class GPE():
             self.U.Vy[:] = self.grid.kyy * self.U.temp
             self.U.Vz[:] = self.grid.kzz * self.U.temp
             self.grid.ksqr[0, 0, 0] = 0 
+            
+            #incompressible part calculation
             self.U.omegai_kx[:] = self.U.omegai_kx - self.U.Vx
             self.U.omegai_ky[:] = self.U.omegai_ky - self.U.Vy
             self.U.omegai_kz[:] = self.U.omegai_kz - self.U.Vz
@@ -272,7 +310,10 @@ class GPE():
             arrays containing the kinetic energy decomposition
         """
         self.omegak()
-        if self.params.dim == 2:
+        if self.params.dim == 1:
+            KE_comp = 0.5 * fns.integralk(self.params, self.params.xp.abs(self.U.Vx)**2, self.params)
+            KE_incomp = 0.5 * fns.integralk(self.params, self.params.xp.abs(self.U.omegai_kx)**2, self.params)
+        elif self.params.dim == 2:
             KE_comp = 0.5 * fns.integralk(self.params, self.params.xp.abs(self.U.Vx)**2 + self.params.xp.abs(self.U.Vy)**2, self.params)
             KE_incomp = 0.5 * fns.integralk(self.params, self.params.xp.abs(self.U.omegai_kx)**2 + self.params.xp.abs(self.U.omegai_ky)**2, self.params)
         else:
@@ -293,7 +334,7 @@ class GPE():
     #     return self.bining(self.U.temp)
     
     def comp_KEcomp_spectrum(self):
-        self.omegak()
+        self.omegak()            
         if self.params.dim == 2:
             KE_incompk = 0.5 * (self.params.xp.abs(self.U.omegai_kx)**2 + self.params.xp.abs(self.U.omegai_ky)**2) 
             KE_compk = 0.5 * (self.params.xp.abs(self.U.Vx)**2 + self.params.xp.abs(self.U.Vy)**2)
