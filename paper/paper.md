@@ -66,7 +66,7 @@ The ground state calculations in ``quTARANG`` are done by using TSSP with an ima
 
 1. Ground state calculations for different potentials such as harmonic and anharmonic trap, optical lattice potential, time-dependent potential and stochastic potential.
 2. Long-time dynamical evolution of different states using either CPUs or GPUs.
-3. Computation of different quantities relevant to the study of turbulence phenomenon in BECs, such as components of kinetic energy (KE) and various spectrums (compressible KE spectrum, incompressible KE spectrum and particle number spectrum).
+3. Computation of different quantities relevant to the study of turbulence phenomenon in BECs, such as components of kinetic energy (KE) and various spectra (compressible KE spectrum, incompressible KE spectrum and particle number spectrum).
 
 |   $Dimension$        | **$g$**      | **$r_{rms}$** | **$r^*_{rms}$** | **$\mu$** | **$\mu^*$**|
 |:------------:|:------------:|:-------------:|:----------------:|:----------:|:----------:|
